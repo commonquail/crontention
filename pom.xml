@@ -100,6 +100,18 @@
           </systemProperties>
         </configuration>
       </plugin>
+      <plugin>
+        <groupId>com.heroku.sdk</groupId>
+        <artifactId>heroku-maven-plugin</artifactId>
+        <version>3.0.1</version>
+        <configuration>
+          <appName>crontention</appName>
+          <jdkVersion>11</jdkVersion>
+          <processTypes>
+            <web>java $JAVA_OPTS -Dquarkus.http.port=$PORT -jar target/crontention-*-runner.jar</web>
+          </processTypes>
+        </configuration>
+      </plugin>
     </plugins>
   </build>
   <profiles>
