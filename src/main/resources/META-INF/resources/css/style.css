@@ -1,0 +1,83 @@
+body {
+  background-color: aliceblue;
+  font-family: Arial, Helvetica, sans-serif;
+}
+textarea {
+  font-size: 1rem;
+}
+code {
+  background-color: #f8f8f8;
+  border-radius: 2px;
+  border: 1px solid #eaecf0;
+  color: black;
+  font-family: "Consolas", monospace;
+}
+#grid-main {
+  width: 1140px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  column-gap: 1rem;
+  align-items: first baseline;
+}
+.grid-span {
+  grid-column: 1 / -1;
+}
+.grid-left {
+  grid-column: 1 / 2;
+}
+.grid-right {
+  grid-column: 2 / -1;
+}
+.help {
+  justify-self: last baseline;
+  align-self: start;
+  font-size: .8rem;
+}
+#theform {
+  grid-column: 1 / 3;
+  display: grid;
+  grid-template-columns: 2fr repeat(4, 1fr) 2fr;
+  align-items: center;
+}
+#theform > label:nth-of-type(1),
+#errors,
+#expressions {
+  grid-column: 2 / 6;
+}
+#theform > label:nth-of-type(2) {
+  grid-column: 2;
+}
+#date {
+  grid-column: 3;
+  width: 100%; /* Fx: input spills over colum gaps. This helps. */
+}
+#theform > button {
+  grid-column: 5;
+}
+.input {
+  border: 1px solid #aaa;
+  border-radius: 2px;
+  padding: 2px;
+  margin: 2px 0px;
+}
+button.input {
+  padding: 2px 12px;
+}
+.input.has-error {
+  border-color: red;
+}
+.infobox {
+  box-shadow: 0 .1rem .2rem rgba(0, 0, 0, .3);
+  background-color: #fff;
+  padding: 0 1rem;;
+  border-radius: 2px;
+}
+.cell {
+  stroke-width: 1;
+  stroke: none;
+  cursor: pointer;
+}
+g {
+  font-size: .8rem;
+}

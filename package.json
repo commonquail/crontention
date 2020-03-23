@@ -1,0 +1,17 @@
+{
+  "name": "crontention",
+  "version": "0.0.1",
+  "scripts": {
+    "bundle": "tsc-bundle ./tsconfig.json --importAs d3=d3",
+    "fix-bundler": "dos2unix node_modules/typescript-bundle/tsc-bundle"
+  },
+  "devDependencies": {
+    "@types/d3": "5.7.2",
+    "@types/node": "13.9.3",
+    "typescript": "3.8.3",
+    "typescript-bundle": "1.0.16"
+  },
+  "dependencies": {
+    "d3": "5.15.0"
+  }
+}

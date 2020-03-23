@@ -1,0 +1,43 @@
+<!doctype HTML>
+<html>
+<head>
+    <title>Crontention</title>
+    <script src="https://d3js.org/d3.v5.min.js"></script>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <div id="grid-main">
+        <h1 class="grid-left">Crontention</h1>
+        <p class="grid-right help"><a href="/about.html">What is this?</a></p>
+        <form id="theform" action="/" class="grid-left">
+            <label for="expressions">Quartz cron expressions</label>
+            <textarea id="expressions" name="expressions"
+                form="theform"
+                class="input"
+                rows="8"
+                spellcheck="false"
+                placeholder="0 0/5 14,18 * * ?
+0 15 10 ? * 6L 2012-2035
+0 15 10 ? * MON-FRI"></textarea>
+            <label for="date">Evaluate for date</label>
+            <input id="date" name="date" form="theform" class="input" placeholder="today">
+            <button id="submit" class="input">Evaluate</button>
+            <div id="errors" hidden>
+                <h2>Input errors</h2>
+                <dl></dl>
+            </div>
+        </form>
+        <div id="heatmap" class="grid-span">
+            <h2>Heat map</h2>
+        </div>
+        <div id="summary" class="grid-left infobox">
+            <h3>Most contention</h3>
+            <ul></ul>
+        </div>
+        <div id="detail" class="grid-right infobox">
+            <h3>Hover cell for details</h3>
+        </div>
+    </div>
+    <script async src="/js/bundle.js"></script>
+</body>
+</html>

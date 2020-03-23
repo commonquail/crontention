@@ -1,0 +1,26 @@
+{
+  "compileOnSave": true,
+  "compilerOptions": {
+    "newLine": "lf",
+    "noEmit": false,
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitAny": true,
+    "noImplicitReturns": true,
+    "outDir": "./src/main/resources/META-INF/resources/js",
+    "sourceMap": true,
+    "strict": true,
+    "module": "ESNext",
+    "target": "ES2015",
+    "lib": [
+      "DOM",
+      "DOM.Iterable",
+      "ES2015"
+    ],
+    "watch": true
+  },
+  "exclude": [
+    "node_modules",
+    "node",
+    "target"
+  ]
+}

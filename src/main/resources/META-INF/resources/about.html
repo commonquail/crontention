@@ -1,0 +1,64 @@
+<!doctype HTML>
+<html>
+<head>
+    <title>Crontention | About</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<div id="grid-main">
+    <h1 class="grid-span">What is <a href="/">Crontention</a>?</h1>
+    <div class="grid-left">
+        <p><dfn>Crontention</dfn> visualizes potential contention caused by the <a href="https://www.quartz-scheduler.org/">Quartz Job Scheduler</a>'s cron trigger expressions.
+The name is a portmanteu of <i><a href="https://en.wikipedia.org/wiki/Cron">cron</a></i> and <i><a href="https://en.wikipedia.org/wiki/Resource_contention">contention</a></i>.</p>
+        <p>Crontention evaluates Quartz cron expressions for a single UTC day and draws a heat map of overlapping fire-times.
+The darker the color, the greater the risk of contention. Use that information to spread out events to utilize resources more evenly or arrange dependencies.
+<a href="/?expressions=*+*+2%2C3+%3F+*+SUN-MON+*%0A0+1+*+*+*+%3F+*%0A1+*+*+%3F+*+*+*%0A*+*+1+*+*+%3F+*%0A0+2%2C3%2C5+1+*+*+%3F+*%0A0+2%2C4+1+*+*+%3F+*%0A0+2-4+1%2C3+*+*+%3F+*%0A0+4+1+*+*+%3F+*%0A10+2%2C5+1%2F2+*+*+%3F+*%0A1+4%2C6+1+*+*+%3F+*">See an example</a>.</p>
+    </div>
+    <div class="grid-right">
+        <h2>Usage</h2>
+        <ol>
+            <li>Enter your Quartz cron expressions in the large text area.</li>
+            <li>Optionally, choose a specific ISO 8601 date to evaluate the expressions for.</li>
+            <li>Click <i>Evaluate</i>.</li>
+            <li>Inspect the heat map.</li>
+            <li>Optionally, save or share the URL.</li>
+        </ol>
+    </div>
+    <div class="grid-left">
+        <h2>Features and limitations</h2>
+        <ul>
+            <li>Evaluations can be hot-linked.</li>
+            <li>The heat map's color scale has high contrast.</li>
+            <li>Crontention uses a real Quartz scheduler to evaluate fire-times.
+This means expression evaluations are authentic but also that Crontention relies on a server-side component.</li>
+            <li><a href="https://crontention.herokuapp.com">https://crontention.herokuapp.com</a> runs on a <a href="https://www.heroku.com/dynos">Heroku <i>Free</i> dyno</a> so it is likely you have to wait for it to wake up every time you visit.</li>
+            <li>All times are in UTC.</li>
+            <li>Only a single day of events will be calculated&mdash;by default, the current date.</li>
+            <li>The heat map's granularity is constrained to minutes and therefore overestimates the footprint of sub-minute duration jobs.</li>
+            <li>The heat map does not consider job duration and therefore underestimates the footprint of long-running jobs.</li>
+            <li>The heat map's colors are relative, not absolute: a dark red color can mean anything from 6 simultaneous events to 600 simultaneous events, depending on context.</li>
+        </ul>
+        <h3>Standard support</h3>
+        <p>Crontention does not support standard crontab (UNIX) cron expressions, however, they can be manually translated into nearly or fully equivalent Quartz cron expressions in this way:</p>
+        <ol>
+            <li>If it is a macro, <a href="https://en.wikipedia.org/w/index.php?title=Cron&oldid=946276475#Nonstandard_predefined_scheduling_definitions">translate it into standard form</a>.</li>
+            <li>Prepend a <code>0</code> for the missing <i>second</i> field.</li>
+            <li>Replace either the <i>day-of-month</i> or <i>day-of-week</i> field with <code>?</code>, but not both.</li>
+            <li>Remove the <i>command</i> field.</li>
+        </ol>
+    </div>
+    <div class="grid-right">
+        <h2>See also</h2>
+        <ul>
+            <li><a href="https://cronheatmap.com/">Cron Heatmap</a> draws heat maps of standard cron expressions.
+It does not support Quartz cron expressions or hot-linking, and the heat map's color scale has poor contrast.
+It is the main motivation and source of inspiration for Crontention.</li>
+            <li>FreeFormatter.com's <a href="https://www.freeformatter.com/cron-expression-generator-quartz.html">Free Online Cron Expression Generator and Describer</a>, whose name rolls right off the tongue, evaluates a small amount of future fire-times for a single Quartz cron expression.
+It does not support contention indication in any way.</li>
+            <li>Quartz Scheduler's <a href="http://www.quartz-scheduler.org/documentation/quartz-2.3.0/tutorials/crontrigger.html">Cron Trigger Tutorial</a> is a decent introduction to understanding and using Quartz's cron implementation.</li>
+            <li>Quartz Scheduler's <a href="https://www.quartz-scheduler.org/api/2.3.0/org/quartz/CronExpression.html"><code>CronExpression</code> API documentation</a> is the best documentation of Quartz's cron expression syntax.</li>
+        </ul>
+    </div>
+</div>
+</body>
+</html>
