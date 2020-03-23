@@ -1,0 +1,27 @@
+variables:
+  MAVEN_OPTS: '-Dhttps.protocols=TLSv1.2 -Dmaven.repo.local=$CI_PROJECT_DIR/.m2/repository -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=WARN -Dorg.slf4j.simpleLogger.showDateTime=true -Djava.awt.headless=true'
+  MAVEN_CLI_OPTS: '--batch-mode --errors --fail-at-end --show-version'
+
+image: maven:3.6-jdk-11
+
+cache:
+  paths:
+    - '$CI_PROJECT_DIR/.m2/repository'
+
+stages:
+  - test
+  - deploy
+
+build:
+  except:
+    - tags
+  stage: test
+  script:
+    - 'mvn $MAVEN_CLI_OPTS package'
+
+release:
+  only:
+    - tags
+  stage: deploy
+  script:
+    - 'mvn $MAVEN_CLI_OPTS heroku:deploy'
