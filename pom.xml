@@ -144,6 +144,8 @@
         </plugins>
       </build>
       <properties>
+        <quarkus.native.builder-image>quay.io/quarkus/ubi-quarkus-native-image:20.0.0-java11</quarkus.native.builder-image>
+        <quarkus.native.container-build>true</quarkus.native.container-build>
         <quarkus.package.type>native</quarkus.package.type>
       </properties>
     </profile>
