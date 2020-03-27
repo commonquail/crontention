@@ -8,6 +8,8 @@ heat map of overlapping fire-times. The darker the color, the greater the risk
 of contention. Use that information to spread out events to utilize resources
 more evenly or arrange dependencies.
 
+[Visit Crontention on Heroku][url-deploy] to use it or learn more about it.
+
 ## Building
 
 Crontention uses Java 11, Quarkus, TypeScript, and D3.js.
@@ -65,4 +67,5 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 
+[url-deploy]: https://crontention.herokuapp.com/
 [url-quartz]: https://www.quartz-scheduler.org/
