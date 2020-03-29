@@ -245,7 +245,18 @@
                 alert(e.message);
             }
         };
+        const disableInteractivity = () => {
+            submit.disabled = true;
+            const pleasewait = submit.nextElementSibling;
+            pleasewait.hidden = false;
+        };
+        const restoreInteractivity = () => {
+            submit.disabled = false;
+            const pleasewait = submit.nextElementSibling;
+            pleasewait.hidden = true;
+        };
         const load = () => {
+            disableInteractivity();
             // Microsoft/TypeScript#30584
             const body = new URLSearchParams(new FormData(form));
             fetch("/evaluate", {
@@ -263,7 +274,8 @@
                 throw new Error(text);
             }))
                 .then(draw)
-                .catch(handleError);
+                .catch(handleError)
+                .finally(restoreInteractivity);
         };
         const repopulateFormWith = (params) => {
             form.expressions.value = params.get("expressions") || null;
@@ -308,7 +320,9 @@
         const submitForm = (e) => {
             e.preventDefault();
             e.stopPropagation();
+            disableInteractivity();
             if (!isInputValid()) {
+                setTimeout(restoreInteractivity, 20);
                 return;
             }
             const params = new URLSearchParams(new FormData(form));
@@ -320,7 +334,7 @@
         const initState = new Map(new URLSearchParams(location.search));
         history.replaceState(initState, "initial");
         repopulateFormWith(initState);
-        load();
+        submit.click();
     });
     //# sourceMappingURL=bundle.js.map
     'marker:resolver';
