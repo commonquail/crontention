@@ -1,6 +1,9 @@
 package io.gitlab.mkjeldsen.crontention;
 
+import com.github.benmanes.caffeine.cache.Caffeine;
+import com.github.benmanes.caffeine.cache.LoadingCache;
 import io.gitlab.mkjeldsen.crontention.csv.ShittyCsv;
+import java.time.Duration;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
@@ -26,26 +29,50 @@ public final class ContentionController {
 
     static final String FORM_DATE = "date";
 
+    /**
+     * Caches the payload of a request. It would have been more elegant to cache
+     * the individual cron expressions so they could be composed but because
+     * {@link FireTime} is a running aggregate that becomes difficult. This
+     * won't work when somebody iterates over configurations but it will help
+     * when the same configuration is loaded often in a short period of time,
+     * such as when sharing a linking.
+     */
+    private final LoadingCache<ContentionCacheKey, String> cache;
+
+    public ContentionController() {
+        cache =
+                Caffeine.newBuilder()
+                        .maximumSize(500)
+                        // Heroku sleeps after 30m. Don't spend CPU expiring
+                        // entries
+                        // Heroku would expire for us.
+                        .expireAfterWrite(Duration.ofHours(1))
+                        .build(this::computeEntry);
+    }
+
     @POST
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Produces(MEDIA_TYPE_CSV)
     public String calculate(
             @Nullable @FormParam(FORM_EXPRESSIONS) final String expressions,
             @Nullable @FormParam(FORM_DATE) final String date) {
+        return cache.get(new ContentionCacheKey(expressions, date));
+    }
 
+    private String computeEntry(final ContentionCacheKey k) {
         final ContentionAggregator aggregator;
         try {
-            aggregator = ContentionAggregator.forUtcDate(date);
+            aggregator = ContentionAggregator.forUtcDate(k.date);
         } catch (final DateFieldValueException e) {
-            final var details = Map.of("value", date, "msg", e.getMessage());
+            final var details = Map.of("value", k.date, "msg", e.getMessage());
             throw failWithInfo(Map.of(FORM_DATE, details));
         }
 
         final Collection<FireTime> fireTimes;
-        if (expressions == null || expressions.isEmpty()) {
+        if (k.expressions == null || k.expressions.isEmpty()) {
             fireTimes = Collections.emptyList();
         } else {
-            aggregator.parseCronExpressions(expressions);
+            aggregator.parseCronExpressions(k.expressions);
             fireTimes = aggregator.calculateFireTimes();
             if (!aggregator.errors.isEmpty()) {
                 throw failWithInfo(Map.of(FORM_EXPRESSIONS, aggregator.errors));
