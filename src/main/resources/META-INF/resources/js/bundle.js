@@ -322,6 +322,16 @@
             e.stopPropagation();
             disableInteractivity();
             if (!isInputValid()) {
+                // If input switched from non-empty to empty, make sure to update the
+                // URL; but leave out the query parameters because empty parameters
+                // looks clumsy. History API can't navigate to an empty URL (then it
+                // helpfully defaults to the current URL, which is the one we're trying
+                // to change) but it can navigate to "?" and "/". If empty -> empty,
+                // do nothing.
+                if (location.search) {
+                    const emptyState = new Map();
+                    history.pushState(emptyState, "", "/");
+                }
                 setTimeout(restoreInteractivity, 20);
                 return;
             }
