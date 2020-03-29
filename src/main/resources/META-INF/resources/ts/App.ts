@@ -295,7 +295,21 @@ const handleError = (e: Error) => {
     }
 }
 
+const disableInteractivity = () => {
+    submit.disabled = true;
+    const pleasewait = submit.nextElementSibling as HTMLElement;
+    pleasewait.hidden = false;
+};
+
+const restoreInteractivity = () => {
+    submit.disabled = false;
+    const pleasewait = submit.nextElementSibling as HTMLElement;
+    pleasewait.hidden = true;
+};
+
 const load = () => {
+    disableInteractivity();
+
     // Microsoft/TypeScript#30584
     const body = new URLSearchParams(new FormData(form) as any);
     fetch("/evaluate", {
@@ -313,7 +327,8 @@ const load = () => {
             throw new Error(text);
         })
         .then(draw)
-        .catch(handleError);
+        .catch(handleError)
+        .finally(restoreInteractivity);
 }
 
 type HistoryState = Map<string, string>;
@@ -368,7 +383,9 @@ const submitForm = (e: Event) => {
     e.preventDefault();
     e.stopPropagation();
 
+    disableInteractivity();
     if (!isInputValid()) {
+        setTimeout(restoreInteractivity, 20);
         return;
     }
 
@@ -384,4 +401,4 @@ const initState: HistoryState = new Map(new URLSearchParams(location.search));
 history.replaceState(initState, "initial");
 repopulateFormWith(initState);
 
-load();
+submit.click()

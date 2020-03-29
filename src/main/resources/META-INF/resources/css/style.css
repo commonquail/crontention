@@ -55,6 +55,12 @@ code {
 #theform > button {
   grid-column: 5;
 }
+#theform > button + p {
+  grid-column: 6;
+  font-size: .8rem;
+  margin: 0;
+  padding-left: .5rem;
+}
 .input {
   border: 1px solid #aaa;
   border-radius: 2px;
