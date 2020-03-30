@@ -4,7 +4,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.text.ParseException;
 import org.junit.jupiter.api.Test;
-import org.quartz.CronExpression;
 
 final class ExpressionErrorDetailTest {
     @Test
@@ -13,7 +12,7 @@ final class ExpressionErrorDetailTest {
         final var someErrorMessage = "Some error message";
         final var actual =
                 new ExpressionErrorDetail(
-                        new CronExpression(someExpression),
+                        ExpressionInput.parse(someExpression),
                         new Throwable(someErrorMessage));
 
         final var expected =

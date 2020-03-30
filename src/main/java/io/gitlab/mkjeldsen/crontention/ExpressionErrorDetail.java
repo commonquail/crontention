@@ -1,7 +1,5 @@
 package io.gitlab.mkjeldsen.crontention;
 
-import org.quartz.CronExpression;
-
 public final class ExpressionErrorDetail {
     public final String expr;
     public final String msg;
@@ -15,8 +13,9 @@ public final class ExpressionErrorDetail {
         this(expr, e.getMessage());
     }
 
-    public ExpressionErrorDetail(final CronExpression cron, final Throwable e) {
-        this(cron.getCronExpression(), e);
+    public ExpressionErrorDetail(
+            final ExpressionInput input, final Throwable e) {
+        this(input.input, e);
     }
 
     @Override
