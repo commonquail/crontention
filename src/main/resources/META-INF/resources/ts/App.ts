@@ -406,9 +406,13 @@ const submitForm = (e: Event) => {
         return;
     }
 
+    // We don't need endless identical history states.
     const params = new URLSearchParams(new FormData(form) as any);
     const newSearch = "?" + params;
-    history.pushState(new Map(params), newSearch, newSearch);
+    if (location.search !== newSearch) {
+        history.pushState(new Map(params), newSearch, newSearch);
+    }
+
     load();
 }
 
