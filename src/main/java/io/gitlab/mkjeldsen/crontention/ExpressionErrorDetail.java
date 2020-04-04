@@ -18,4 +18,16 @@ public final class ExpressionErrorDetail {
     public ExpressionErrorDetail(final CronExpression cron, final Throwable e) {
         this(cron.getCronExpression(), e);
     }
+
+    @Override
+    public String toString() {
+        return "ExpressionErrorDetail{"
+                + "expr='"
+                + expr
+                + '\''
+                + ", msg='"
+                + msg
+                + '\''
+                + '}';
+    }
 }

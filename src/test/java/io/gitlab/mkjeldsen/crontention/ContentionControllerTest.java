@@ -216,7 +216,9 @@ class ContentionControllerTest {
                 .statusCode(HttpStatus.SC_BAD_REQUEST)
                 .contentType(ContentType.JSON)
                 .body("date.value", is(someFarAwayDate))
-                .body("date.msg", startsWith("Must be within 100 years"));
+                .body(
+                        "date.msg",
+                        startsWith("Must not be later than 100 years"));
     }
 
     private static Response requestWith(final Map<String, String> formParams) {

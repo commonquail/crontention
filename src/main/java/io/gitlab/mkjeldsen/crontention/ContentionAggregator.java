@@ -40,13 +40,14 @@ public final class ContentionAggregator {
         // appropriate but doesn't have easy j.u.Date conversion, which we need.
         final Instant periodStart;
 
+        final String strippedDate;
         if (date == null
-                || date.isBlank()
-                || "today".equalsIgnoreCase(date.strip())) {
+                || (strippedDate = date.strip()).isEmpty()
+                || "today".equalsIgnoreCase(strippedDate)) {
             periodStart = Instant.now().truncatedTo(ChronoUnit.DAYS);
         } else {
             try {
-                final var requestedDate = LocalDate.parse(date);
+                final var requestedDate = LocalDate.parse(strippedDate);
                 ensureQuartzCompatibleDate(requestedDate);
                 periodStart =
                         requestedDate.atStartOfDay(ZoneOffset.UTC).toInstant();
@@ -62,10 +63,13 @@ public final class ContentionAggregator {
     private static void ensureQuartzCompatibleDate(final LocalDate date)
             throws DateFieldValueException {
         final int requestedYear = date.getYear();
+        if (requestedYear < 1970) {
+            throw DateFieldValueException.tooEarly(requestedYear);
+        }
         final int thisYear = LocalDate.now(ZoneOffset.UTC).getYear();
-        final int yearDiff = Math.abs(requestedYear - thisYear);
+        final int yearDiff = requestedYear - thisYear;
         if (yearDiff > 100) {
-            throw new DateFieldValueException(yearDiff);
+            throw DateFieldValueException.tooLate(yearDiff);
         }
     }
 
