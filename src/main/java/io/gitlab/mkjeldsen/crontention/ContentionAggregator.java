@@ -75,12 +75,13 @@ public final class ContentionAggregator {
 
     public void parseCronExpressions(final String expressions) {
         final var utc = TimeZone.getTimeZone(ZoneOffset.UTC);
+        final var exprs = expressions.split("\n");
         // List, not Set. Duplicate expressions are expected; the whole point is
         // that
         // 1) any two expressions can contend for the same slot, and
         // 2) expressions are defined independently and without context.
-        final var crons = new ArrayList<CronExpression>();
-        for (final var expr : expressions.split("\n")) {
+        final var crons = new ArrayList<CronExpression>(exprs.length);
+        for (final var expr : exprs) {
             try {
                 final var cron = new CronExpression(expr);
                 cron.setTimeZone(utc);
