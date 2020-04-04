@@ -223,6 +223,7 @@
             }
             errors.replaceChild(dl, errors.lastElementChild);
             errors.hidden = false;
+            draw([]);
         };
         const handleError = (e) => {
             if (e instanceof JsonError) {
