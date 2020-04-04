@@ -272,6 +272,7 @@ const reportErrors = (errs: ErrorFeedback) => {
     }
     errors.replaceChild(dl, errors.lastElementChild!);
     errors.hidden = false;
+    draw([]);
 }
 
 const handleError = (e: Error) => {
