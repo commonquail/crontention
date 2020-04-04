@@ -33,7 +33,7 @@ code {
   grid-row: 2 / 5;
 }
 .help {
-  justify-self: last baseline;
+  justify-self: end;
   align-self: start;
   font-size: .8rem;
 }
