@@ -341,9 +341,12 @@
                 setTimeout(restoreInteractivity, 20);
                 return;
             }
+            // We don't need endless identical history states.
             const params = new URLSearchParams(new FormData(form));
             const newSearch = "?" + params;
-            history.pushState(new Map(params), newSearch, newSearch);
+            if (location.search !== newSearch) {
+                history.pushState(new Map(params), newSearch, newSearch);
+            }
             load();
         };
         submit.addEventListener("click", submitForm);
