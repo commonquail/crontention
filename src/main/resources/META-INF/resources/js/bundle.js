@@ -87,7 +87,7 @@
             const exprs = document.createElement("ul");
             for (const expr of d.meta.split(/\n/)) {
                 const code = document.createElement("code");
-                code.textContent = expr;
+                code.innerHTML = expr.replace(/ /g, "&nbsp;");
                 const li = document.createElement("li");
                 li.appendChild(code);
                 exprs.appendChild(li);

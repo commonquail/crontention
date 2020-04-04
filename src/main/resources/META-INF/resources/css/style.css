@@ -29,6 +29,9 @@ code {
 .grid-right {
   grid-column: 2 / -1;
 }
+.about-features {
+  grid-row: 2 / 5;
+}
 .help {
   justify-self: last baseline;
   align-self: start;
