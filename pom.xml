@@ -200,6 +200,12 @@
               <threads>4</threads>
               <withHistory>true</withHistory>
               <timestampedReports>false</timestampedReports>
+              <excludedClasses>
+                <param>io.gitlab.mkjeldsen.crontention.ContentionController</param>
+              </excludedClasses>
+              <excludedTestClasses>
+                <param>io.gitlab.mkjeldsen.crontention.ContentionControllerTest</param>
+              </excludedTestClasses>
             </configuration>
           </plugin>
         </plugins>
