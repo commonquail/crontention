@@ -304,11 +304,16 @@
             }
             if (evalDate !== "today") {
                 const evalYear = parseInt(evalDate.substr(0, 4));
+                if (evalYear < 1970) {
+                    dateField.classList.add("has-error");
+                    reportErrors([[dateField.value, `Must be 1970 or later, was ${evalYear}.`]]);
+                    return false;
+                }
                 const thisYear = new Date().getUTCFullYear();
-                const diff = Math.abs(evalYear - thisYear);
+                const diff = evalYear - thisYear;
                 if (diff > 100) {
                     dateField.classList.add("has-error");
-                    reportErrors([[dateField.value, `Must be within 100 years of this year, was ${diff}.`]]);
+                    reportErrors([[dateField.value, `Must not be later than 100 years of this year, was ${diff}.`]]);
                     return false;
                 }
             }
