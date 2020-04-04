@@ -1,0 +1,2 @@
+version=1
+jvm_options="-XX:TieredStopAtLevel=1"
