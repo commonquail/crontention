@@ -15,6 +15,7 @@ import io.restassured.response.Response;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.apache.http.HttpHeaders;
 import org.apache.http.HttpStatus;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -41,6 +42,7 @@ class ContentionControllerTest {
                 .then()
                 .statusCode(HttpStatus.SC_OK)
                 .contentType(ContentionController.MEDIA_TYPE_CSV)
+                .header(HttpHeaders.CONTENT_ENCODING, "gzip")
                 .body(startsWith(CSV_HEADER))
                 .body(containsString(expectSimpleRecord));
     }

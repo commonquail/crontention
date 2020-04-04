@@ -16,6 +16,7 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
+import org.jboss.resteasy.annotations.GZIP;
 import org.wildfly.common.annotation.Nullable;
 
 @Path(ContentionController.ENDPOINT)
@@ -52,6 +53,7 @@ public final class ContentionController {
 
     @POST
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    @GZIP
     @Produces(MEDIA_TYPE_CSV)
     public String calculate(
             @Nullable @FormParam(FORM_EXPRESSIONS) final String expressions,
