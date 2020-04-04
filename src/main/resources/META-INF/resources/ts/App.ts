@@ -79,18 +79,27 @@ interface Cell {
 
 const mouseover = function (this: SVGGElement, d: Cell) {
     d3.select(this).style("stroke", "black");
+    setDetail(d);
+}
 
+const setDetail = (d: Cell | null) => {
     const exprs = document.createElement("ul");
-    for (const expr of d.meta.split(/\n/)) {
-        const code = document.createElement("code");
-        code.innerHTML = expr.replace(/ /g, "&nbsp;");
-        const li = document.createElement("li");
-        li.appendChild(code);
-        exprs.appendChild(li);
-    }
     const container = document.createElement("div");
     const header = document.createElement("h3");
-    header.textContent = `${d.value} event${d.value === 1 ? "" : "s"} at ${d.key}:`;
+
+    if (d) {
+        for (const expr of d.meta.split(/\n/)) {
+            const code = document.createElement("code");
+            code.innerHTML = expr.replace(/ /g, "&nbsp;");
+            const li = document.createElement("li");
+            li.appendChild(code);
+            exprs.appendChild(li);
+        }
+        header.textContent = `${d.value} event${d.value === 1 ? "" : "s"} at ${d.key}:`
+    } else {
+        header.textContent = "Hover cell for details";
+    }
+
     container.appendChild(header);
     container.appendChild(exprs);
     detail.replaceChild(container, detail.lastElementChild!);
@@ -310,6 +319,7 @@ const restoreInteractivity = () => {
 
 const load = () => {
     disableInteractivity();
+    setDetail(null);
 
     // Microsoft/TypeScript#30584
     const body = new URLSearchParams(new FormData(form) as any);
