@@ -83,7 +83,6 @@
             }
         }
         const mouseover = function (d) {
-            d3.select(this).style("stroke", "black");
             setDetail(d);
         };
         const setDetail = (d) => {
@@ -106,9 +105,6 @@
             container.appendChild(header);
             container.appendChild(exprs);
             detail.replaceChild(container, detail.lastElementChild);
-        };
-        const mouseleave = function (_) {
-            d3.select(this).style("stroke", "none");
         };
         const seqDomainOf = (sortedData) => {
             const hi = sortedData[0];
@@ -154,8 +150,7 @@
                 .attr("width", xScale.bandwidth())
                 .attr("height", yScale.bandwidth())
                 .style("fill", fillCell)
-                .on("mouseover", mouseover)
-                .on("mouseleave", mouseleave);
+                .on("mouseover", mouseover);
             cells.exit().remove();
             summarize(data);
         };
