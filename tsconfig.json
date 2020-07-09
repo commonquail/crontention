@@ -19,7 +19,11 @@
     ],
     "watch": true
   },
+  "include": [
+    "./src/**/*.ts"
+  ],
   "exclude": [
+    "acceptance",
     "node_modules",
     "node",
     "target"

@@ -37,3 +37,5 @@ release.properties
 *.map
 [A-Z]*.js
 node_modules/
+
+acceptance/output/
