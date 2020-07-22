@@ -184,6 +184,16 @@ const draw = (data: Cell[]) => {
     summarize(data);
 }
 
+const compareContentionHotSpotAsc = (a: Cell, b: Cell): -1 | 0 | 1 => {
+    if (a.key < b.key) {
+        return -1;
+    }
+    if (a.key > b.key) {
+        return 1;
+    }
+    return 0;
+}
+
 const summarize = (data: readonly Cell[]) => {
     interface GroupByValue {
         [index: number]: Cell[]
@@ -210,6 +220,7 @@ const summarize = (data: readonly Cell[]) => {
 
     const container = document.createElement("ul");
     for (const contention of mostContention) {
+        contention.sort(compareContentionHotSpotAsc);
         const first = contention[0];
         if (!first) {
             throw new RangeError("contention");

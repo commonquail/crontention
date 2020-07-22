@@ -159,6 +159,15 @@
             cells.exit().remove();
             summarize(data);
         };
+        const compareContentionHotSpotAsc = (a, b) => {
+            if (a.key < b.key) {
+                return -1;
+            }
+            if (a.key > b.key) {
+                return 1;
+            }
+            return 0;
+        };
         const summarize = (data) => {
             // GROUP BY VALUE
             // ORDER BY VALUE DESC
@@ -180,6 +189,7 @@
             }
             const container = document.createElement("ul");
             for (const contention of mostContention) {
+                contention.sort(compareContentionHotSpotAsc);
                 const first = contention[0];
                 if (!first) {
                     throw new RangeError("contention");
