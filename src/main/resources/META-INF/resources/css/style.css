@@ -87,6 +87,9 @@ button.input {
   stroke: none;
   cursor: pointer;
 }
+.cell:hover {
+  stroke: black;
+}
 g {
   font-size: .8rem;
 }
