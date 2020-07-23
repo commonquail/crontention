@@ -51,6 +51,36 @@ yarn install
 yarn fix-bundler
 ```
 
+#### Acceptance tests
+
+When Crontention is running you can execute acceptance tests. These are built
+with [CodeceptJS][url-codeceptjs].
+
+Run all acceptance tests in batch mode with something like
+
+```sh
+HEADLESS=1 yarn test:acceptance:parallel 4
+```
+
+Note that the above method suffers from an internal race condition and can, in
+very rare cases, incorrectly assign a "scenario" to a different "feature",
+causing a false positive failure.
+
+Run a selection of tests in display mode with something like
+
+```sh
+yarn test:acceptance --grep home
+```
+
+After defining a new page object, run
+
+```sh
+yarn test:acceptance:def
+```
+
+Acceptance tests don't run in CI because there are no official Docker images
+with both Maven and Node.js and I don't want to maintain one.
+
 # License: Apache-2.0
 
 Copyright 2020 Mikkel Kjeldsen
@@ -67,5 +97,6 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 
+[url-codeceptjs]: https://codecept.io/
 [url-deploy]: https://crontention.herokuapp.com/
 [url-quartz]: https://www.quartz-scheduler.org/

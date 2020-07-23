@@ -1,0 +1,23 @@
+{
+  "compilerOptions": {
+    "target": "ES2017",
+    "moduleResolution": "node",
+    "module": "commonjs",
+    "sourceMap": true,
+    "noImplicitAny": true,
+    "alwaysStrict": true,
+    "strictNullChecks": true,
+    "allowJs": true,
+    "noEmit": true,
+    "lib": [
+      "DOM",
+      "ES2016",
+      "ES2017"
+    ],
+    "baseUrl": ".",
+    "types": [
+      "node",
+      "./typings/steps"
+    ]
+  }
+}
