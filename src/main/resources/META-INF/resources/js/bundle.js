@@ -92,7 +92,9 @@
             if (d) {
                 for (const expr of d.meta.split(/\n/)) {
                     const code = document.createElement("code");
-                    code.innerHTML = expr.replace(/ /g, "&nbsp;");
+                    code.innerHTML = expr
+                        .replace(/</g, "&lt;")
+                        .replace(/ /g, "&nbsp;");
                     const li = document.createElement("li");
                     li.appendChild(code);
                     exprs.appendChild(li);
