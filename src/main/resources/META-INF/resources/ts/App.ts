@@ -92,6 +92,12 @@ const onClickCell = function (this: CellElement, d: CellDatum) {
     setDetail(d);
 }
 
+const newExpressionTextElement = (html: string): HTMLElement => {
+    const code = document.createElement("code");
+    code.innerHTML = html.replace(/</g, "&lt;").replace(/  /g, "&nbsp; ");
+    return code;
+}
+
 const setDetail = (d: CellDatum | null) => {
     const exprs = document.createElement("ul");
     const container = document.createElement("div");
@@ -99,10 +105,7 @@ const setDetail = (d: CellDatum | null) => {
 
     if (d) {
         for (const expr of d.meta.split(/\n/)) {
-            const code = document.createElement("code");
-            code.innerHTML = expr
-                .replace(/</g, "&lt;")
-                .replace(/  /g, "&nbsp; ");
+            const code = newExpressionTextElement(expr);
             const li = document.createElement("li");
             li.appendChild(code);
             exprs.appendChild(li);

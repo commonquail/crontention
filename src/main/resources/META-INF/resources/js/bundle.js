@@ -93,16 +93,18 @@
             detailLock.freezeOrUnfreeze(this);
             setDetail(d);
         };
+        const newExpressionTextElement = (html) => {
+            const code = document.createElement("code");
+            code.innerHTML = html.replace(/</g, "&lt;").replace(/  /g, "&nbsp; ");
+            return code;
+        };
         const setDetail = (d) => {
             const exprs = document.createElement("ul");
             const container = document.createElement("div");
             const header = document.createElement("h3");
             if (d) {
                 for (const expr of d.meta.split(/\n/)) {
-                    const code = document.createElement("code");
-                    code.innerHTML = expr
-                        .replace(/</g, "&lt;")
-                        .replace(/  /g, "&nbsp; ");
+                    const code = newExpressionTextElement(expr);
                     const li = document.createElement("li");
                     li.appendChild(code);
                     exprs.appendChild(li);
