@@ -30,8 +30,10 @@
         const width = (cellSize * 60);
         const height = (cellSize * 24);
         const errors = document.getElementById("errors");
+        const renderedExpressions = document.getElementById("rendered-listing");
         const form = document.getElementById("theform");
         const submit = document.getElementById("submit");
+        const edit = document.getElementById("edit");
         const dateField = document.getElementById("date");
         const expressionsField = document.getElementById("expressions");
         const summary = document.getElementById("summary");
@@ -146,7 +148,30 @@
         const repositionX = (d) => xScale(d.m) || null;
         const repositionY = (d) => yScale(d.h) || null;
         const expressionsIn = (exprs) => exprs.split(/[\n\r]/g).filter((e) => !!e);
+        const idOfExpression = (expr) => btoa(expr).replace(/[^A-z]/g, "_");
+        const accCellClass = (prev, cur) => `${prev} ${idOfExpression(cur)}`;
+        const generateClasses = (d) => {
+            return d.exprs.reduce(accCellClass, "cell");
+        };
+        const renderExpressions = () => {
+            const container = document.createElement("ul");
+            container.classList.add("rendered-list");
+            for (const expr of expressionsIn(expressionsField.value)) {
+                const exprId = idOfExpression(expr);
+                const code = newExpressionTextElement(expr);
+                code.dataset.exprId = exprId;
+                code.classList.add("rendered-entry");
+                const block = document.createElement("li");
+                block.appendChild(code);
+                container.appendChild(block);
+            }
+            const placeholder = renderedExpressions.firstElementChild;
+            renderedExpressions.replaceChild(container, placeholder);
+        };
         const draw = (data) => {
+            renderExpressions();
+            hide(form);
+            show(renderedExpressions);
             data.sort(compareCellDatumDesc);
             const scaleFill = scaleFillFactory(data);
             const fillCell = (d) => scaleFill(d.value);
@@ -154,11 +179,12 @@
             const cells = svg
                 .selectAll(".cell")
                 .data(data, (d) => d.key)
+                .attr("class", generateClasses)
                 .style("fill", fillCell);
             cells
                 .enter()
                 .append("rect")
-                .attr("class", "cell")
+                .attr("class", generateClasses)
                 .attr("x", repositionX)
                 .attr("y", repositionY)
                 .attr("width", xScale.bandwidth())
@@ -253,6 +279,8 @@
             errors.replaceChild(dl, errors.lastElementChild);
             show(errors);
             draw([]);
+            hide(renderedExpressions);
+            show(form);
         };
         const handleError = (e) => {
             if (e instanceof JsonError) {
@@ -380,6 +408,39 @@
             }
             load();
         };
+        const editForm = (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            resetActiveHighlight();
+            show(form);
+            hide(renderedExpressions);
+        };
+        const resetActiveHighlight = () => {
+            const turnOff = (el) => el.classList.remove("highlight");
+            document.querySelectorAll(".highlight").forEach(turnOff);
+        };
+        const docClick = (e) => {
+            const clicked = e.target;
+            if (!clicked) {
+                return;
+            }
+            if (clicked instanceof HTMLElement) {
+                if (clicked.dataset.exprId) {
+                    const shouldTurnOn = !clicked.classList.contains("highlight");
+                    const turnOn = (el) => el.classList.add("highlight");
+                    // Reset, in case we have an active selection...
+                    resetActiveHighlight();
+                    // ... then apply a different selection, unless the user tried to
+                    // turn off the active selection.
+                    if (shouldTurnOn) {
+                        document
+                            .querySelectorAll(`.${clicked.dataset.exprId}`)
+                            .forEach(turnOn);
+                        turnOn(clicked);
+                    }
+                }
+            }
+        };
         class DetailLock {
             get frozen() {
                 return this.frozenCell !== undefined;
@@ -402,6 +463,8 @@
         }
         DetailLock.s = "lock";
         submit.addEventListener("click", submitForm);
+        edit.addEventListener("click", editForm);
+        document.addEventListener("click", docClick);
         const detailLock = new DetailLock();
         const initState = new Map(new URLSearchParams(location.search));
         history.replaceState(initState, "initial");

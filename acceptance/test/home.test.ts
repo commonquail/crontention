@@ -12,6 +12,7 @@ Scenario("loads default page", (I, home: home) => {
     I.see("Most contention");
     I.see("Hover cell for details");
     I.dontSeeElement(home.cell);
+    I.dontSeeElement(home.renderedListing);
 });
 
 Scenario("links to about page", (I, about: about, home: home) => {

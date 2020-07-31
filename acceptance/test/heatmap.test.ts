@@ -8,6 +8,7 @@ Before((I, home: home) => {
 
 Scenario("init heat map from query", async (I, home: home) => {
     I.amOnPage(home.url + "?expressions=0+2-4+1%2C3+*+*+%3F+*&date=2020-08-14")
+    I.seeElement(home.renderedListing);
     I.seeNumberOfElements(home.cell, 6);
     I.see("1 event at 01:02, 01:03, 01:04, 03:02, …");
 });
@@ -16,6 +17,8 @@ Scenario("draws cell for each active minute of day", (I, home: home) => {
     const everyMinute = ["0 * * * * ?"];
     home.evaluateExpressions(everyMinute);
     I.seeNumberOfVisibleElements(home.cell, 60 * 24);
+
+    home.clickEdit();
 
     const singleMinute = ["0 0 0 * * ?"];
     home.evaluateExpressions(singleMinute);
@@ -55,6 +58,8 @@ Scenario("draws schedule for specific date", (I, home: home) => {
 
     home.evaluateExpressions(patterns, "2020-07-12");
     I.seeNumberOfVisibleElements(home.cell, 1);
+
+    home.clickEdit();
 
     home.evaluateExpressions(patterns, "2020-07-13");
     I.seeNumberOfVisibleElements(home.cell, 2);

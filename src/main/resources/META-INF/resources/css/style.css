@@ -52,6 +52,16 @@ code {
   grid-template-columns: 2fr repeat(4, 1fr) 2fr;
   align-items: center;
 }
+#rendered-listing {
+  grid-column: 1 / 3;
+  display: grid;
+  grid-template-columns: 2fr repeat(4, 1fr) 2fr;
+  align-items: center;
+}
+#edit {
+  grid-column: 1 / -1;
+  justify-self: center;
+}
 #theform > label:nth-of-type(1),
 #errors,
 #expressions {
@@ -104,4 +114,17 @@ button.input {
 }
 g {
   font-size: .8rem;
+}
+.highlight {
+  stroke: blue;
+  border: 1px solid blue;
+}
+.rendered-list {
+  grid-column: 2 / 6;
+}
+.rendered-entry {
+  cursor: pointer;
+}
+.rendered-entry:hover {
+  outline: 1px dashed blue;
 }

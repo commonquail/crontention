@@ -7,8 +7,10 @@ const width = (cellSize * 60);
 const height = (cellSize * 24);
 
 const errors = document.getElementById("errors") as HTMLElement;
+const renderedExpressions = document.getElementById("rendered-listing") as HTMLElement;
 const form = document.getElementById("theform") as HTMLFormElement;
 const submit = document.getElementById("submit") as HTMLButtonElement;
+const edit = document.getElementById("edit") as HTMLButtonElement;
 const dateField = document.getElementById("date") as HTMLInputElement;
 const expressionsField = document.getElementById("expressions") as HTMLInputElement;
 const summary = document.getElementById("summary") as HTMLElement;
@@ -170,7 +172,36 @@ const repositionY: RepositionScale = (d) => yScale(d.h) || null;
 
 const expressionsIn = (exprs: string): string[] => exprs.split(/[\n\r]/g).filter((e) => !!e);
 
+const idOfExpression = (expr: string): string => btoa(expr).replace(/[^A-z]/g, "_");
+
+const accCellClass = (prev: string, cur: string) => `${prev} ${idOfExpression(cur)}`;
+
+const generateClasses = (d: CellDatum): string => {
+    return d.exprs.reduce(accCellClass, "cell");
+};
+
+const renderExpressions = () => {
+    const container = document.createElement("ul");
+    container.classList.add("rendered-list");
+    for (const expr of expressionsIn(expressionsField.value)) {
+        const exprId = idOfExpression(expr);
+        const code = newExpressionTextElement(expr);
+        code.dataset.exprId = exprId;
+        code.classList.add("rendered-entry")
+        const block = document.createElement("li");
+        block.appendChild(code);
+        container.appendChild(block);
+    }
+
+    const placeholder = renderedExpressions.firstElementChild!;
+    renderedExpressions.replaceChild(container, placeholder);
+}
+
 const draw = (data: CellDatum[]) => {
+    renderExpressions();
+    hide(form);
+    show(renderedExpressions);
+
     data.sort(compareCellDatumDesc);
 
     const scaleFill = scaleFillFactory(data);
@@ -181,12 +212,13 @@ const draw = (data: CellDatum[]) => {
     const cells = svg
         .selectAll<CellElement, CellDatum>(".cell")
         .data(data, (d) => d.key)
+        .attr("class", generateClasses)
         .style("fill", fillCell);
 
     cells
         .enter()
         .append("rect")
-        .attr("class", "cell")
+        .attr("class", generateClasses)
         .attr("x", repositionX)
         .attr("y", repositionY)
         .attr("width", xScale.bandwidth())
@@ -310,6 +342,8 @@ const reportErrors = (errs: ErrorFeedback) => {
     errors.replaceChild(dl, errors.lastElementChild!);
     show(errors);
     draw([]);
+    hide(renderedExpressions);
+    show(form);
 }
 
 const handleError = (e: Error) => {
@@ -454,6 +488,43 @@ const submitForm = (e: Event) => {
     load();
 }
 
+const editForm = (e: Event) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    resetActiveHighlight();
+    show(form);
+    hide(renderedExpressions);
+}
+
+const resetActiveHighlight = () => {
+    const turnOff = (el: Element) => el.classList.remove("highlight");
+    document.querySelectorAll(".highlight").forEach(turnOff);
+}
+
+const docClick = (e: Event) => {
+    const clicked = e.target;
+    if (!clicked) {
+        return;
+    }
+    if (clicked instanceof HTMLElement) {
+        if (clicked.dataset.exprId) {
+            const shouldTurnOn = !clicked.classList.contains("highlight");
+            const turnOn = (el: Element) => el.classList.add("highlight");
+            // Reset, in case we have an active selection...
+            resetActiveHighlight();
+            // ... then apply a different selection, unless the user tried to
+            // turn off the active selection.
+            if (shouldTurnOn) {
+                document
+                    .querySelectorAll(`.${clicked.dataset.exprId}`)
+                    .forEach(turnOn);
+                turnOn(clicked);
+            }
+        }
+    }
+}
+
 class DetailLock {
     private static s = "lock";
 
@@ -481,6 +552,8 @@ class DetailLock {
 }
 
 submit.addEventListener("click", submitForm);
+edit.addEventListener("click", editForm);
+document.addEventListener("click", docClick);
 
 const detailLock = new DetailLock();
 const initState: HistoryState = new Map(new URLSearchParams(location.search));

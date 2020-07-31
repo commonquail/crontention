@@ -7,12 +7,21 @@ export = {
     detailSectionTitle: "Hover cell for details",
     cell: ".cell",
     lock: ".lock",
+    highlight: ".highlight",
+    form: {
+        id: "theform"
+    },
+    renderedListing: "#rendered-listing",
+    renderedEntry: ".rendered-entry",
     fields: {
         expressions: "#expressions",
         date: "#date",
     },
     submitButton: {
         id: "submit"
+    },
+    editButton: {
+        id: "edit"
     },
     navigateToAbout: () => {
         I.clickLink("What is this?");
@@ -21,6 +30,17 @@ export = {
         I.fillField(this.fields.expressions, expr.join("\n"));
         I.fillField(this.fields.date, date || "today");
         I.click(this.submitButton);
+    },
+    clickRenderedListing: function(n?: number) {
+        const num: number = n || 1;
+        const sel = `${this.renderedListing} li:nth-child(${num}) ${this.renderedEntry}`;
+        I.click(sel);
+    },
+    clickEdit: function() {
+        I.click(this.editButton);
+    },
+    getCellClasses: async function(): Promise<string[]> {
+        return I.grabAttributeFrom(this.cell, "class") as any as string[];
     },
     nthCell: function(n: number): string {
         return `${this.cell}:nth-of-type(${n})`;
