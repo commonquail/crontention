@@ -103,7 +103,7 @@
             const container = document.createElement("div");
             const header = document.createElement("h3");
             if (d) {
-                for (const expr of d.meta.split(/\n/)) {
+                for (const expr of d.exprs) {
                     const code = newExpressionTextElement(expr);
                     const li = document.createElement("li");
                     li.appendChild(code);
@@ -145,6 +145,7 @@
         const compareCellDatumDesc = (a, b) => b.value - a.value;
         const repositionX = (d) => xScale(d.m) || null;
         const repositionY = (d) => yScale(d.h) || null;
+        const expressionsIn = (exprs) => exprs.split(/[\n\r]/g).filter((e) => !!e);
         const draw = (data) => {
             data.sort(compareCellDatumDesc);
             const scaleFill = scaleFillFactory(data);
@@ -234,6 +235,7 @@
                 m: +rawRow.m,
                 value: +rawRow.count,
                 meta: rawRow.expressions,
+                exprs: expressionsIn(rawRow.expressions),
             };
         };
         const reportErrors = (errs) => {

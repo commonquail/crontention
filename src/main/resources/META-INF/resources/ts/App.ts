@@ -78,6 +78,7 @@ interface CellDatum {
     readonly m: number;
     readonly value: number;
     readonly meta: string;
+    readonly exprs: ReadonlyArray<string>;
 }
 
 interface CellElement extends SVGRectElement {}
@@ -104,7 +105,7 @@ const setDetail = (d: CellDatum | null) => {
     const header = document.createElement("h3");
 
     if (d) {
-        for (const expr of d.meta.split(/\n/)) {
+        for (const expr of d.exprs) {
             const code = newExpressionTextElement(expr);
             const li = document.createElement("li");
             li.appendChild(code);
@@ -166,6 +167,8 @@ interface RepositionScale {
 
 const repositionX: RepositionScale = (d) => xScale(d.m) || null;
 const repositionY: RepositionScale = (d) => yScale(d.h) || null;
+
+const expressionsIn = (exprs: string): string[] => exprs.split(/[\n\r]/g).filter((e) => !!e);
 
 const draw = (data: CellDatum[]) => {
     data.sort(compareCellDatumDesc);
@@ -269,6 +272,7 @@ const convertRow: ConvertRow = (rawRow, _index, _columns) => {
         m: +rawRow.m,
         value: +rawRow.count,
         meta: rawRow.expressions,
+        exprs: expressionsIn(rawRow.expressions),
     };
 }
 
