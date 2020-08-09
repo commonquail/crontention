@@ -14,6 +14,9 @@ const expressionsField = document.getElementById("expressions") as HTMLInputElem
 const summary = document.getElementById("summary") as HTMLElement;
 const detail = document.getElementById("detail") as HTMLElement;
 
+const hide = (e: HTMLElement): void => e.classList.add("hidden");
+const show = (e: HTMLElement): void => e.classList.remove("hidden");
+
 const svg = d3.select("#heatmap")
     .append("svg")
     .attr("width", width + margin.left + margin.right)
@@ -287,7 +290,7 @@ const reportErrors = (errs: ErrorFeedback) => {
         dl.appendChild(dd);
     }
     errors.replaceChild(dl, errors.lastElementChild!);
-    errors.hidden = false;
+    show(errors);
     draw([]);
 }
 
@@ -315,13 +318,13 @@ const handleError = (e: Error) => {
 const disableInteractivity = () => {
     submit.disabled = true;
     const pleasewait = submit.nextElementSibling as HTMLElement;
-    pleasewait.hidden = false;
+    show(pleasewait);
 };
 
 const restoreInteractivity = () => {
     submit.disabled = false;
     const pleasewait = submit.nextElementSibling as HTMLElement;
-    pleasewait.hidden = true;
+    hide(pleasewait);
 };
 
 const load = () => {
@@ -370,7 +373,7 @@ const onpopstate = (e: PopStateEvent): void => {
 window.addEventListener("popstate", onpopstate);
 
 const isInputValid: () => boolean = () => {
-    errors.hidden = true;
+    hide(errors);
     dateField.classList.remove("has-error");
     expressionsField.classList.remove("has-error");
 
