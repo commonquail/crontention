@@ -36,6 +36,8 @@
         const expressionsField = document.getElementById("expressions");
         const summary = document.getElementById("summary");
         const detail = document.getElementById("detail");
+        const hide = (e) => e.classList.add("hidden");
+        const show = (e) => e.classList.remove("hidden");
         const svg = d3.select("#heatmap")
             .append("svg")
             .attr("width", width + margin.left + margin.right)
@@ -237,7 +239,7 @@
                 dl.appendChild(dd);
             }
             errors.replaceChild(dl, errors.lastElementChild);
-            errors.hidden = false;
+            show(errors);
             draw([]);
         };
         const handleError = (e) => {
@@ -264,12 +266,12 @@
         const disableInteractivity = () => {
             submit.disabled = true;
             const pleasewait = submit.nextElementSibling;
-            pleasewait.hidden = false;
+            show(pleasewait);
         };
         const restoreInteractivity = () => {
             submit.disabled = false;
             const pleasewait = submit.nextElementSibling;
-            pleasewait.hidden = true;
+            hide(pleasewait);
         };
         const load = () => {
             disableInteractivity();
@@ -309,7 +311,7 @@
         };
         window.addEventListener("popstate", onpopstate);
         const isInputValid = () => {
-            errors.hidden = true;
+            hide(errors);
             dateField.classList.remove("has-error");
             expressionsField.classList.remove("has-error");
             const evalDate = dateField.value.toLowerCase() || "today";

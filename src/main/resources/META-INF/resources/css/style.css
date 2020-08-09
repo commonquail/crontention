@@ -12,6 +12,10 @@ code {
   color: black;
   font-family: "Consolas", monospace;
 }
+/* https://css-tricks.com/the-hidden-attribute-is-visibly-weak/ */
+.hidden {
+  display: none !important;
+}
 #grid-main {
   width: 1140px;
   margin: 0 auto;
