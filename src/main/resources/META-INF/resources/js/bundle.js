@@ -85,6 +85,12 @@
             }
         }
         const mouseover = function (d) {
+            if (detailLock.frozen)
+                return;
+            setDetail(d);
+        };
+        const onClickCell = function (d) {
+            detailLock.freezeOrUnfreeze(this);
             setDetail(d);
         };
         const setDetail = (d) => {
@@ -141,6 +147,7 @@
             data.sort(compareCellDesc);
             const scaleFill = scaleFillFactory(data);
             const fillCell = (c) => scaleFill(c.value);
+            detailLock.unfreeze();
             const cells = svg
                 .selectAll(".cell")
                 .data(data, (d) => d.key)
@@ -154,6 +161,7 @@
                 .attr("width", xScale.bandwidth())
                 .attr("height", yScale.bandwidth())
                 .style("fill", fillCell)
+                .on("click", onClickCell)
                 .on("mouseover", mouseover);
             cells.exit().remove();
             summarize(data);
@@ -368,7 +376,29 @@
             }
             load();
         };
+        class DetailLock {
+            get frozen() {
+                return this.frozenCell !== undefined;
+            }
+            unfreeze() {
+                var _a;
+                (_a = this.frozenCell) === null || _a === void 0 ? void 0 : _a.classList.remove(DetailLock.s);
+                this.frozenCell = undefined;
+            }
+            freezeOrUnfreeze(cell) {
+                const freezeOther = cell !== this.frozenCell;
+                // Whether requested to unfreeze self or freeze other, we always have
+                // to unfreeze self.
+                this.unfreeze();
+                if (freezeOther) {
+                    cell.classList.add(DetailLock.s);
+                    this.frozenCell = cell;
+                }
+            }
+        }
+        DetailLock.s = "lock";
         submit.addEventListener("click", submitForm);
+        const detailLock = new DetailLock();
         const initState = new Map(new URLSearchParams(location.search));
         history.replaceState(initState, "initial");
         repopulateFormWith(initState);

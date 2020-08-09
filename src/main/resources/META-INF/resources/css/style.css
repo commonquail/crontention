@@ -94,6 +94,9 @@ button.input {
 .cell:hover {
   stroke: black;
 }
+.cell.lock {
+  stroke: green;
+}
 g {
   font-size: .8rem;
 }
