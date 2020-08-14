@@ -6,6 +6,12 @@ Before((I, home: home) => {
     I.amOnPage(home.url);
 })
 
+Scenario("init heat map from query", async (I, home: home) => {
+    I.amOnPage(home.url + "?expressions=0+2-4+1%2C3+*+*+%3F+*&date=2020-08-14")
+    I.seeNumberOfElements(home.cell, 6);
+    I.see("1 event at 01:02, 01:03, 01:04, 03:02, …");
+});
+
 Scenario("draws cell for each active minute of day", (I, home: home) => {
     const everyMinute = ["0 * * * * ?"];
     home.evaluateExpressions(everyMinute);
