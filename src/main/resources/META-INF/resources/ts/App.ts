@@ -81,6 +81,12 @@ interface Cell {
 }
 
 const mouseover = function (this: SVGGElement, d: Cell) {
+    if (detailLock.frozen) return;
+    setDetail(d);
+}
+
+const onClickCell = function (this: SVGGElement, d: Cell) {
+    detailLock.freezeOrUnfreeze(this);
     setDetail(d);
 }
 
@@ -162,6 +168,8 @@ const draw = (data: Cell[]) => {
     const scaleFill = scaleFillFactory(data);
     const fillCell = (c: Cell) => scaleFill(c.value);
 
+    detailLock.unfreeze();
+
     const cells = svg
         .selectAll<SVGGElement, Cell>(".cell")
         .data(data, (d) => d.key)
@@ -176,6 +184,7 @@ const draw = (data: Cell[]) => {
         .attr("width", xScale.bandwidth())
         .attr("height", yScale.bandwidth())
         .style("fill", fillCell)
+        .on("click", onClickCell)
         .on("mouseover", mouseover);
 
     cells.exit().remove();
@@ -436,8 +445,35 @@ const submitForm = (e: Event) => {
     load();
 }
 
+class DetailLock {
+    private static s = "lock";
+
+    private frozenCell?: Element;
+
+    public get frozen() : boolean {
+        return this.frozenCell !== undefined;
+    }
+
+    public unfreeze() {
+        this.frozenCell?.classList.remove(DetailLock.s);
+        this.frozenCell = undefined;
+    }
+
+    public freezeOrUnfreeze(cell: SVGElement) {
+        const freezeOther = cell !== this.frozenCell;
+        // Whether requested to unfreeze self or freeze other, we always have
+        // to unfreeze self.
+        this.unfreeze();
+        if (freezeOther) {
+            cell.classList.add(DetailLock.s);
+            this.frozenCell = cell;
+        }
+    }
+}
+
 submit.addEventListener("click", submitForm);
 
+const detailLock = new DetailLock();
 const initState: HistoryState = new Map(new URLSearchParams(location.search));
 history.replaceState(initState, "initial");
 repopulateFormWith(initState);

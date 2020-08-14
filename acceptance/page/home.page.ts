@@ -6,6 +6,7 @@ export = {
     detailSection: "#detail",
     detailSectionTitle: "Hover cell for details",
     cell: ".cell",
+    lock: ".lock",
     fields: {
         expressions: "#expressions",
         date: "#date",
