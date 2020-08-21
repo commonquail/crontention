@@ -66,7 +66,7 @@ Scenario("updates summary on render", (I, home: home) => {
 Scenario("updates detail section when hovering over cell", (I, home: home) => {
     home.evaluateExpressions(["0 * * * * ?"]);
     I.see(home.detailSectionTitle, home.detailSection);
-    I.moveCursorTo("rect:first-of-type");
+    I.moveCursorTo(home.nthCell(1));
     I.dontSee(home.detailSectionTitle, home.detailSection);
     // "n events at x:y", but order of <rect>s is unpredictable so we don't
     // know what the time is.
@@ -79,7 +79,7 @@ Scenario("freeze unfrozen cell", async (I, home: home) => {
     home.evaluateExpressions([twoCells]);
 
     // ... and that nothing is frozen.
-    I.dontSeeElement(home.lock)
+    I.dontSeeElement(home.lock);
 
     // Doesn't matter what's in the detail section now but we need to show that
     // it changes.
@@ -87,10 +87,10 @@ Scenario("freeze unfrozen cell", async (I, home: home) => {
 
     // Freeze a cell; don't know which one or which one gets frozen but at least
     // the detail section changes.
-    const cellToFreeze = "rect:nth-of-type(1)"
-    const someOtherCell = "rect:nth-of-type(2)"
+    const cellToFreeze = home.nthCell(1);
+    const someOtherCell = home.nthCell(2);
     I.click(cellToFreeze);
-    I.seeElement(home.lock)
+    I.seeElement(home.lock);
     const detailAfterFreeze = await I.grabTextFrom(home.detailSection);
     assert.notEqual(detailInitial, detailAfterFreeze);
 
@@ -106,15 +106,15 @@ Scenario("unfreeze frozen cell", async (I, home: home) => {
     home.evaluateExpressions([twoCells]);
 
     // Freeze a cell and grab a state sentinel.
-    const cellToFreeze = "rect:nth-of-type(1)"
-    const someOtherCell = "rect:nth-of-type(2)"
+    const cellToFreeze = home.nthCell(1);
+    const someOtherCell = home.nthCell(2);
     I.click(cellToFreeze);
     const detailAfterFreeze = await I.grabTextFrom(home.detailSection);
 
     // Then unfreeze the frozen cell...
     I.click(cellToFreeze);
     // ... and prove that functionality is restored.
-    I.dontSeeElement(home.lock)
+    I.dontSeeElement(home.lock);
     I.moveCursorTo(someOtherCell);
     const detailAfterUnfreezeAndHover = await I.grabTextFrom(home.detailSection);
     assert.notEqual(detailAfterFreeze, detailAfterUnfreezeAndHover);
@@ -125,17 +125,17 @@ Scenario("freeze unfrozen cell when other cell frozen", async (I, home: home) =>
     home.evaluateExpressions([twoCells]);
 
     // Freeze a cell...
-    const someCell = "rect:nth-of-type(1)"
+    const someCell = home.nthCell(1);
     I.click(someCell);
     const detailAfterFirstFreeze = await I.grabTextFrom(home.detailSection);
 
     // ... then freeze another.
-    const someOtherCell = "rect:nth-of-type(2)"
+    const someOtherCell = home.nthCell(2);
     I.click(someOtherCell);
     const detailAfterSecondFreeze = await I.grabTextFrom(home.detailSection);
 
     // Still locked...
-    I.seeElement(home.lock)
+    I.seeElement(home.lock);
     // ... but now with different state.
     assert.notEqual(detailAfterFirstFreeze, detailAfterSecondFreeze);
 });

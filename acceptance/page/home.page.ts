@@ -22,4 +22,7 @@ export = {
         I.fillField(this.fields.date, date || "today");
         I.click(this.submitButton);
     },
+    nthCell: function(n: number): string {
+        return `${this.cell}:nth-of-type(${n})`;
+    }
 };
