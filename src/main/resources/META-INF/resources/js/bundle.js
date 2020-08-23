@@ -140,13 +140,13 @@
                 .scaleOrdinal(d3.schemeOranges[domainSize])
                 .domain(ordinalDomain);
         };
-        const compareCellDesc = (a, b) => b.value - a.value;
+        const compareCellDatumDesc = (a, b) => b.value - a.value;
         const repositionX = (d) => xScale(d.m) || null;
         const repositionY = (d) => yScale(d.h) || null;
         const draw = (data) => {
-            data.sort(compareCellDesc);
+            data.sort(compareCellDatumDesc);
             const scaleFill = scaleFillFactory(data);
-            const fillCell = (c) => scaleFill(c.value);
+            const fillCell = (d) => scaleFill(d.value);
             detailLock.unfreeze();
             const cells = svg
                 .selectAll(".cell")
