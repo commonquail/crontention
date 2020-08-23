@@ -172,21 +172,12 @@ const repositionY: RepositionScale = (d) => yScale(d.h) || null;
 
 const expressionsIn = (exprs: string): string[] => exprs.split(/[\n\r]/g).filter((e) => !!e);
 
-const idOfExpression = (expr: string): string => btoa(expr).replace(/[^A-z]/g, "_");
-
-const accCellClass = (prev: string, cur: string) => `${prev} ${idOfExpression(cur)}`;
-
-const generateClasses = (d: CellDatum): string => {
-    return d.exprs.reduce(accCellClass, "cell");
-};
-
 const renderExpressions = () => {
     const container = document.createElement("ul");
     container.classList.add("rendered-list");
     for (const expr of expressionsIn(expressionsField.value)) {
-        const exprId = idOfExpression(expr);
         const code = newExpressionTextElement(expr);
-        code.dataset.exprId = exprId;
+        code.dataset.expr = expr;
         code.classList.add("rendered-entry")
         const block = document.createElement("li");
         block.appendChild(code);
@@ -195,6 +186,21 @@ const renderExpressions = () => {
 
     const placeholder = renderedExpressions.firstElementChild!;
     renderedExpressions.replaceChild(container, placeholder);
+}
+
+interface CacheCellByExpression {
+    (d: CellDatum, index: number, groups: ArrayLike<CellElement>): void;
+}
+
+const cacheCellByExpression: CacheCellByExpression = (d, index, cells) => {
+    const cell = cells[index];
+    for (const expr of d.exprs) {
+        let cells = cellsForExpression[expr];
+        if (!cells) {
+            cells = cellsForExpression[expr] = [];
+        }
+        cells.push(cell);
+    }
 }
 
 const draw = (data: CellDatum[]) => {
@@ -212,13 +218,13 @@ const draw = (data: CellDatum[]) => {
     const cells = svg
         .selectAll<CellElement, CellDatum>(".cell")
         .data(data, (d) => d.key)
-        .attr("class", generateClasses)
+        .attr("class", "cell")
         .style("fill", fillCell);
 
     cells
         .enter()
         .append("rect")
-        .attr("class", generateClasses)
+        .attr("class", "cell")
         .attr("x", repositionX)
         .attr("y", repositionY)
         .attr("width", xScale.bandwidth())
@@ -228,6 +234,9 @@ const draw = (data: CellDatum[]) => {
         .on("mouseover", mouseover);
 
     cells.exit().remove();
+
+    cellsForExpression = {};
+    svg.selectAll<CellElement, CellDatum>(".cell").each(cacheCellByExpression);
 
     summarize(data);
 }
@@ -508,7 +517,7 @@ const docClick = (e: Event) => {
         return;
     }
     if (clicked instanceof HTMLElement) {
-        if (clicked.dataset.exprId) {
+        if (clicked.dataset.expr) {
             const shouldTurnOn = !clicked.classList.contains("highlight");
             const turnOn = (el: Element) => el.classList.add("highlight");
             // Reset, in case we have an active selection...
@@ -516,9 +525,7 @@ const docClick = (e: Event) => {
             // ... then apply a different selection, unless the user tried to
             // turn off the active selection.
             if (shouldTurnOn) {
-                document
-                    .querySelectorAll(`.${clicked.dataset.exprId}`)
-                    .forEach(turnOn);
+                cellsForExpression[clicked.dataset.expr].forEach(turnOn);
                 turnOn(clicked);
             }
         }
@@ -554,6 +561,12 @@ class DetailLock {
 submit.addEventListener("click", submitForm);
 edit.addEventListener("click", editForm);
 document.addEventListener("click", docClick);
+
+interface CellsForExpression {
+    [index: string]: CellElement[]
+}
+
+let cellsForExpression: CellsForExpression = {};
 
 const detailLock = new DetailLock();
 const initState: HistoryState = new Map(new URLSearchParams(location.search));

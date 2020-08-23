@@ -148,18 +148,12 @@
         const repositionX = (d) => xScale(d.m) || null;
         const repositionY = (d) => yScale(d.h) || null;
         const expressionsIn = (exprs) => exprs.split(/[\n\r]/g).filter((e) => !!e);
-        const idOfExpression = (expr) => btoa(expr).replace(/[^A-z]/g, "_");
-        const accCellClass = (prev, cur) => `${prev} ${idOfExpression(cur)}`;
-        const generateClasses = (d) => {
-            return d.exprs.reduce(accCellClass, "cell");
-        };
         const renderExpressions = () => {
             const container = document.createElement("ul");
             container.classList.add("rendered-list");
             for (const expr of expressionsIn(expressionsField.value)) {
-                const exprId = idOfExpression(expr);
                 const code = newExpressionTextElement(expr);
-                code.dataset.exprId = exprId;
+                code.dataset.expr = expr;
                 code.classList.add("rendered-entry");
                 const block = document.createElement("li");
                 block.appendChild(code);
@@ -167,6 +161,16 @@
             }
             const placeholder = renderedExpressions.firstElementChild;
             renderedExpressions.replaceChild(container, placeholder);
+        };
+        const cacheCellByExpression = (d, index, cells) => {
+            const cell = cells[index];
+            for (const expr of d.exprs) {
+                let cells = cellsForExpression[expr];
+                if (!cells) {
+                    cells = cellsForExpression[expr] = [];
+                }
+                cells.push(cell);
+            }
         };
         const draw = (data) => {
             renderExpressions();
@@ -179,12 +183,12 @@
             const cells = svg
                 .selectAll(".cell")
                 .data(data, (d) => d.key)
-                .attr("class", generateClasses)
+                .attr("class", "cell")
                 .style("fill", fillCell);
             cells
                 .enter()
                 .append("rect")
-                .attr("class", generateClasses)
+                .attr("class", "cell")
                 .attr("x", repositionX)
                 .attr("y", repositionY)
                 .attr("width", xScale.bandwidth())
@@ -193,6 +197,8 @@
                 .on("click", onClickCell)
                 .on("mouseover", mouseover);
             cells.exit().remove();
+            cellsForExpression = {};
+            svg.selectAll(".cell").each(cacheCellByExpression);
             summarize(data);
         };
         const compareContentionHotSpotAsc = (a, b) => {
@@ -425,7 +431,7 @@
                 return;
             }
             if (clicked instanceof HTMLElement) {
-                if (clicked.dataset.exprId) {
+                if (clicked.dataset.expr) {
                     const shouldTurnOn = !clicked.classList.contains("highlight");
                     const turnOn = (el) => el.classList.add("highlight");
                     // Reset, in case we have an active selection...
@@ -433,9 +439,7 @@
                     // ... then apply a different selection, unless the user tried to
                     // turn off the active selection.
                     if (shouldTurnOn) {
-                        document
-                            .querySelectorAll(`.${clicked.dataset.exprId}`)
-                            .forEach(turnOn);
+                        cellsForExpression[clicked.dataset.expr].forEach(turnOn);
                         turnOn(clicked);
                     }
                 }
@@ -465,6 +469,7 @@
         submit.addEventListener("click", submitForm);
         edit.addEventListener("click", editForm);
         document.addEventListener("click", docClick);
+        let cellsForExpression = {};
         const detailLock = new DetailLock();
         const initState = new Map(new URLSearchParams(location.search));
         history.replaceState(initState, "initial");
