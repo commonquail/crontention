@@ -72,7 +72,7 @@ class JsonError extends Error {
     }
 }
 
-interface Cell {
+interface CellDatum {
     readonly key: string;
     readonly h: number;
     readonly m: number;
@@ -80,17 +80,19 @@ interface Cell {
     readonly meta: string;
 }
 
-const mouseover = function (this: SVGGElement, d: Cell) {
+interface CellElement extends SVGRectElement {}
+
+const mouseover = function (this: CellElement, d: CellDatum) {
     if (detailLock.frozen) return;
     setDetail(d);
 }
 
-const onClickCell = function (this: SVGGElement, d: Cell) {
+const onClickCell = function (this: CellElement, d: CellDatum) {
     detailLock.freezeOrUnfreeze(this);
     setDetail(d);
 }
 
-const setDetail = (d: Cell | null) => {
+const setDetail = (d: CellDatum | null) => {
     const exprs = document.createElement("ul");
     const container = document.createElement("div");
     const header = document.createElement("h3");
@@ -116,7 +118,7 @@ const setDetail = (d: Cell | null) => {
 }
 
 interface SeqDomainFactory {
-    (sortedData: readonly (Cell | undefined)[]): [number, number];
+    (sortedData: readonly (CellDatum | undefined)[]): [number, number];
 }
 
 const seqDomainOf: SeqDomainFactory = (sortedData) => {
@@ -130,7 +132,7 @@ const seqDomainOf: SeqDomainFactory = (sortedData) => {
 }
 
 interface ScaleFillFactory {
-    (data: readonly Cell[]):
+    (data: readonly CellDatum[]):
         d3.ScaleOrdinal<number, string> |
         d3.ScaleSequential<string>;
 }
@@ -153,25 +155,25 @@ const scaleFillFactory: ScaleFillFactory = (data) => {
         .domain(ordinalDomain);
 }
 
-const compareCellDesc = (a: Cell, b: Cell) => b.value - a.value;
+const compareCellDatumDesc = (a: CellDatum, b: CellDatum) => b.value - a.value;
 
 interface RepositionScale {
-    (c: Cell): number | null;
+    (d: CellDatum): number | null;
 }
 
 const repositionX: RepositionScale = (d) => xScale(d.m) || null;
 const repositionY: RepositionScale = (d) => yScale(d.h) || null;
 
-const draw = (data: Cell[]) => {
-    data.sort(compareCellDesc);
+const draw = (data: CellDatum[]) => {
+    data.sort(compareCellDatumDesc);
 
     const scaleFill = scaleFillFactory(data);
-    const fillCell = (c: Cell) => scaleFill(c.value);
+    const fillCell = (d: CellDatum) => scaleFill(d.value);
 
     detailLock.unfreeze();
 
     const cells = svg
-        .selectAll<SVGGElement, Cell>(".cell")
+        .selectAll<CellElement, CellDatum>(".cell")
         .data(data, (d) => d.key)
         .style("fill", fillCell);
 
@@ -192,7 +194,7 @@ const draw = (data: Cell[]) => {
     summarize(data);
 }
 
-const compareContentionHotSpotAsc = (a: Cell, b: Cell): -1 | 0 | 1 => {
+const compareContentionHotSpotAsc = (a: CellDatum, b: CellDatum): -1 | 0 | 1 => {
     if (a.key < b.key) {
         return -1;
     }
@@ -202,9 +204,9 @@ const compareContentionHotSpotAsc = (a: Cell, b: Cell): -1 | 0 | 1 => {
     return 0;
 }
 
-const summarize = (data: readonly Cell[]) => {
+const summarize = (data: readonly CellDatum[]) => {
     interface GroupByValue {
-        [index: number]: Cell[]
+        [index: number]: CellDatum[]
     }
 
     // GROUP BY VALUE
@@ -212,7 +214,7 @@ const summarize = (data: readonly Cell[]) => {
     // LIMIT 5
     const take = 5;
     const byValue: GroupByValue = {};
-    const mostContention: Cell[][] = [];
+    const mostContention: CellDatum[][] = [];
     for (const d of data) {
         if (mostContention.length >= take) {
             break;
@@ -248,7 +250,7 @@ const summarize = (data: readonly Cell[]) => {
     summary.replaceChild(container, summary.lastElementChild!);
 }
 
-type ParsedRow = Cell;
+type ParsedRow = CellDatum;
 type Columns = "key" | "h" | "m" | "count" | "expressions";
 type ConvertRow = (rawRow: DSVRowString<Columns>, index: number, columns: Columns[]) => ParsedRow | null;
 
@@ -448,7 +450,7 @@ const submitForm = (e: Event) => {
 class DetailLock {
     private static s = "lock";
 
-    private frozenCell?: Element;
+    private frozenCell?: CellElement;
 
     public get frozen() : boolean {
         return this.frozenCell !== undefined;
@@ -459,7 +461,7 @@ class DetailLock {
         this.frozenCell = undefined;
     }
 
-    public freezeOrUnfreeze(cell: SVGElement) {
+    public freezeOrUnfreeze(cell: CellElement) {
         const freezeOther = cell !== this.frozenCell;
         // Whether requested to unfreeze self or freeze other, we always have
         // to unfreeze self.
