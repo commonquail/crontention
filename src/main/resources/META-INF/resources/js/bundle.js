@@ -30,8 +30,10 @@
         const width = (cellSize * 60);
         const height = (cellSize * 24);
         const errors = document.getElementById("errors");
+        const renderedExpressions = document.getElementById("rendered-listing");
         const form = document.getElementById("theform");
         const submit = document.getElementById("submit");
+        const edit = document.getElementById("edit");
         const dateField = document.getElementById("date");
         const expressionsField = document.getElementById("expressions");
         const summary = document.getElementById("summary");
@@ -93,16 +95,18 @@
             detailLock.freezeOrUnfreeze(this);
             setDetail(d);
         };
+        const newExpressionTextElement = (html) => {
+            const code = document.createElement("code");
+            code.innerHTML = html.replace(/</g, "&lt;").replace(/  /g, "&nbsp; ");
+            return code;
+        };
         const setDetail = (d) => {
             const exprs = document.createElement("ul");
             const container = document.createElement("div");
             const header = document.createElement("h3");
             if (d) {
-                for (const expr of d.meta.split(/\n/)) {
-                    const code = document.createElement("code");
-                    code.innerHTML = expr
-                        .replace(/</g, "&lt;")
-                        .replace(/  /g, "&nbsp; ");
+                for (const expr of d.exprs) {
+                    const code = newExpressionTextElement(expr);
                     const li = document.createElement("li");
                     li.appendChild(code);
                     exprs.appendChild(li);
@@ -143,7 +147,35 @@
         const compareCellDatumDesc = (a, b) => b.value - a.value;
         const repositionX = (d) => xScale(d.m) || null;
         const repositionY = (d) => yScale(d.h) || null;
+        const expressionsIn = (exprs) => exprs.split(/[\n\r]/g).filter((e) => !!e);
+        const renderExpressions = () => {
+            const container = document.createElement("ul");
+            container.classList.add("rendered-list");
+            for (const expr of expressionsIn(expressionsField.value)) {
+                const code = newExpressionTextElement(expr);
+                code.dataset.expr = expr;
+                code.classList.add("rendered-entry");
+                const block = document.createElement("li");
+                block.appendChild(code);
+                container.appendChild(block);
+            }
+            const placeholder = renderedExpressions.firstElementChild;
+            renderedExpressions.replaceChild(container, placeholder);
+        };
+        const cacheCellByExpression = (d, index, cells) => {
+            const cell = cells[index];
+            for (const expr of d.exprs) {
+                let cells = cellsForExpression[expr];
+                if (!cells) {
+                    cells = cellsForExpression[expr] = [];
+                }
+                cells.push(cell);
+            }
+        };
         const draw = (data) => {
+            renderExpressions();
+            hide(form);
+            show(renderedExpressions);
             data.sort(compareCellDatumDesc);
             const scaleFill = scaleFillFactory(data);
             const fillCell = (d) => scaleFill(d.value);
@@ -151,6 +183,7 @@
             const cells = svg
                 .selectAll(".cell")
                 .data(data, (d) => d.key)
+                .attr("class", "cell")
                 .style("fill", fillCell);
             cells
                 .enter()
@@ -164,6 +197,8 @@
                 .on("click", onClickCell)
                 .on("mouseover", mouseover);
             cells.exit().remove();
+            cellsForExpression = {};
+            svg.selectAll(".cell").each(cacheCellByExpression);
             summarize(data);
         };
         const compareContentionHotSpotAsc = (a, b) => {
@@ -232,6 +267,7 @@
                 m: +rawRow.m,
                 value: +rawRow.count,
                 meta: rawRow.expressions,
+                exprs: expressionsIn(rawRow.expressions),
             };
         };
         const reportErrors = (errs) => {
@@ -249,6 +285,8 @@
             errors.replaceChild(dl, errors.lastElementChild);
             show(errors);
             draw([]);
+            hide(renderedExpressions);
+            show(form);
         };
         const handleError = (e) => {
             if (e instanceof JsonError) {
@@ -376,6 +414,37 @@
             }
             load();
         };
+        const editForm = (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            resetActiveHighlight();
+            show(form);
+            hide(renderedExpressions);
+        };
+        const resetActiveHighlight = () => {
+            const turnOff = (el) => el.classList.remove("highlight");
+            document.querySelectorAll(".highlight").forEach(turnOff);
+        };
+        const docClick = (e) => {
+            const clicked = e.target;
+            if (!clicked) {
+                return;
+            }
+            if (clicked instanceof HTMLElement) {
+                if (clicked.dataset.expr) {
+                    const shouldTurnOn = !clicked.classList.contains("highlight");
+                    const turnOn = (el) => el.classList.add("highlight");
+                    // Reset, in case we have an active selection...
+                    resetActiveHighlight();
+                    // ... then apply a different selection, unless the user tried to
+                    // turn off the active selection.
+                    if (shouldTurnOn) {
+                        cellsForExpression[clicked.dataset.expr].forEach(turnOn);
+                        turnOn(clicked);
+                    }
+                }
+            }
+        };
         class DetailLock {
             get frozen() {
                 return this.frozenCell !== undefined;
@@ -398,6 +467,9 @@
         }
         DetailLock.s = "lock";
         submit.addEventListener("click", submitForm);
+        edit.addEventListener("click", editForm);
+        document.addEventListener("click", docClick);
+        let cellsForExpression = {};
         const detailLock = new DetailLock();
         const initState = new Map(new URLSearchParams(location.search));
         history.replaceState(initState, "initial");

@@ -7,8 +7,10 @@ const width = (cellSize * 60);
 const height = (cellSize * 24);
 
 const errors = document.getElementById("errors") as HTMLElement;
+const renderedExpressions = document.getElementById("rendered-listing") as HTMLElement;
 const form = document.getElementById("theform") as HTMLFormElement;
 const submit = document.getElementById("submit") as HTMLButtonElement;
+const edit = document.getElementById("edit") as HTMLButtonElement;
 const dateField = document.getElementById("date") as HTMLInputElement;
 const expressionsField = document.getElementById("expressions") as HTMLInputElement;
 const summary = document.getElementById("summary") as HTMLElement;
@@ -78,6 +80,7 @@ interface CellDatum {
     readonly m: number;
     readonly value: number;
     readonly meta: string;
+    readonly exprs: ReadonlyArray<string>;
 }
 
 interface CellElement extends SVGRectElement {}
@@ -92,17 +95,20 @@ const onClickCell = function (this: CellElement, d: CellDatum) {
     setDetail(d);
 }
 
+const newExpressionTextElement = (html: string): HTMLElement => {
+    const code = document.createElement("code");
+    code.innerHTML = html.replace(/</g, "&lt;").replace(/  /g, "&nbsp; ");
+    return code;
+}
+
 const setDetail = (d: CellDatum | null) => {
     const exprs = document.createElement("ul");
     const container = document.createElement("div");
     const header = document.createElement("h3");
 
     if (d) {
-        for (const expr of d.meta.split(/\n/)) {
-            const code = document.createElement("code");
-            code.innerHTML = expr
-                .replace(/</g, "&lt;")
-                .replace(/  /g, "&nbsp; ");
+        for (const expr of d.exprs) {
+            const code = newExpressionTextElement(expr);
             const li = document.createElement("li");
             li.appendChild(code);
             exprs.appendChild(li);
@@ -164,7 +170,44 @@ interface RepositionScale {
 const repositionX: RepositionScale = (d) => xScale(d.m) || null;
 const repositionY: RepositionScale = (d) => yScale(d.h) || null;
 
+const expressionsIn = (exprs: string): string[] => exprs.split(/[\n\r]/g).filter((e) => !!e);
+
+const renderExpressions = () => {
+    const container = document.createElement("ul");
+    container.classList.add("rendered-list");
+    for (const expr of expressionsIn(expressionsField.value)) {
+        const code = newExpressionTextElement(expr);
+        code.dataset.expr = expr;
+        code.classList.add("rendered-entry")
+        const block = document.createElement("li");
+        block.appendChild(code);
+        container.appendChild(block);
+    }
+
+    const placeholder = renderedExpressions.firstElementChild!;
+    renderedExpressions.replaceChild(container, placeholder);
+}
+
+interface CacheCellByExpression {
+    (d: CellDatum, index: number, groups: ArrayLike<CellElement>): void;
+}
+
+const cacheCellByExpression: CacheCellByExpression = (d, index, cells) => {
+    const cell = cells[index];
+    for (const expr of d.exprs) {
+        let cells = cellsForExpression[expr];
+        if (!cells) {
+            cells = cellsForExpression[expr] = [];
+        }
+        cells.push(cell);
+    }
+}
+
 const draw = (data: CellDatum[]) => {
+    renderExpressions();
+    hide(form);
+    show(renderedExpressions);
+
     data.sort(compareCellDatumDesc);
 
     const scaleFill = scaleFillFactory(data);
@@ -175,6 +218,7 @@ const draw = (data: CellDatum[]) => {
     const cells = svg
         .selectAll<CellElement, CellDatum>(".cell")
         .data(data, (d) => d.key)
+        .attr("class", "cell")
         .style("fill", fillCell);
 
     cells
@@ -190,6 +234,9 @@ const draw = (data: CellDatum[]) => {
         .on("mouseover", mouseover);
 
     cells.exit().remove();
+
+    cellsForExpression = {};
+    svg.selectAll<CellElement, CellDatum>(".cell").each(cacheCellByExpression);
 
     summarize(data);
 }
@@ -266,6 +313,7 @@ const convertRow: ConvertRow = (rawRow, _index, _columns) => {
         m: +rawRow.m,
         value: +rawRow.count,
         meta: rawRow.expressions,
+        exprs: expressionsIn(rawRow.expressions),
     };
 }
 
@@ -303,6 +351,8 @@ const reportErrors = (errs: ErrorFeedback) => {
     errors.replaceChild(dl, errors.lastElementChild!);
     show(errors);
     draw([]);
+    hide(renderedExpressions);
+    show(form);
 }
 
 const handleError = (e: Error) => {
@@ -447,6 +497,41 @@ const submitForm = (e: Event) => {
     load();
 }
 
+const editForm = (e: Event) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    resetActiveHighlight();
+    show(form);
+    hide(renderedExpressions);
+}
+
+const resetActiveHighlight = () => {
+    const turnOff = (el: Element) => el.classList.remove("highlight");
+    document.querySelectorAll(".highlight").forEach(turnOff);
+}
+
+const docClick = (e: Event) => {
+    const clicked = e.target;
+    if (!clicked) {
+        return;
+    }
+    if (clicked instanceof HTMLElement) {
+        if (clicked.dataset.expr) {
+            const shouldTurnOn = !clicked.classList.contains("highlight");
+            const turnOn = (el: Element) => el.classList.add("highlight");
+            // Reset, in case we have an active selection...
+            resetActiveHighlight();
+            // ... then apply a different selection, unless the user tried to
+            // turn off the active selection.
+            if (shouldTurnOn) {
+                cellsForExpression[clicked.dataset.expr].forEach(turnOn);
+                turnOn(clicked);
+            }
+        }
+    }
+}
+
 class DetailLock {
     private static s = "lock";
 
@@ -474,6 +559,14 @@ class DetailLock {
 }
 
 submit.addEventListener("click", submitForm);
+edit.addEventListener("click", editForm);
+document.addEventListener("click", docClick);
+
+interface CellsForExpression {
+    [index: string]: CellElement[]
+}
+
+let cellsForExpression: CellsForExpression = {};
 
 const detailLock = new DetailLock();
 const initState: HistoryState = new Map(new URLSearchParams(location.search));
