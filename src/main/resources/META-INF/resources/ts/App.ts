@@ -38,11 +38,15 @@ const yScale = d3.scaleBand<number>()
 
 const scaleFormat = d3.format("02.0d");
 
-svg.append("g")
-    .call(d3
-        .axisTop(xScale)
-        .tickValues(xScale.domain().filter((_, i) => !(i % 5)))
-        .tickFormat(scaleFormat))
+const xAxisGenerator = d3.axisTop(xScale);
+xAxisGenerator.tickValues(xScale.domain().filter((_, i) => !(i % 5)));
+xAxisGenerator.tickFormat(scaleFormat);
+
+const yAxisGenerator = d3.axisLeft(yScale);
+yAxisGenerator.tickFormat(scaleFormat);
+
+const xAxis = svg.append("g")
+    .call(xAxisGenerator)
     .call(g => g
         .append("text")
         .attr("x", 10 + (width / 2))
@@ -51,8 +55,8 @@ svg.append("g")
         .attr("text-anchor", "middle")
         .text("Minute"));
 
-svg.append("g")
-    .call(d3.axisLeft(yScale).tickFormat(scaleFormat))
+const yAxis = svg.append("g")
+    .call(yAxisGenerator)
     .call(g => g
         .append("text")
         .attr("x", -(height / 2))
@@ -207,6 +211,9 @@ const draw = (data: CellDatum[]) => {
     renderExpressions();
     hide(form);
     show(renderedExpressions);
+
+    xAxis.call(xAxisGenerator);
+    yAxis.call(yAxisGenerator);
 
     data.sort(compareCellDatumDesc);
 
