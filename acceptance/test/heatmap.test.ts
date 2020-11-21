@@ -155,3 +155,46 @@ Scenario("freeze unfrozen cell when other cell frozen", async (I, home: home) =>
     // ... but now with different state.
     assert.notEqual(detailAfterFirstFreeze, detailAfterSecondFreeze);
 });
+
+Scenario("shows time axes in time zone UTC by default", async (I, home: home) => {
+    const somePattern = "0 * * * * ?";
+    home.evaluateExpressions([somePattern]);
+
+    const ticks = await home.getAxesTicks();
+
+    // Conveniently the Cartesian coordinate system origin is at index [first; last].
+    // I don't know if this is by specification but it behaves consistently.
+    const originX = ticks[0];
+    const originY = ticks[ticks.length - 1];
+
+    // Hours along Y, minutes along X, start-of-day in the corner, and
+    // everything defaults to UTC. That means the "first" cell is midnight UTC.
+    assert.equal(`${originY}:${originX}`, "00:00");
+});
+
+Scenario("switch time zone to local", async (I, home: home) => {
+    const somePattern = "0 * * * * ?";
+    home.evaluateExpressions([somePattern]);
+
+    // I don't know of a way to instruct the driver to change its locale.
+    // We can trigger the functionality and compare the tick orders to prove
+    // they switched. That won't prove the switching itself is correct, and it
+    // will fail in any UTC+0 time zone, but whatever.
+    const defaultTicks = await home.getAxesTicks();
+    home.clickSwitchTimeZone();
+    const switchedTicks = await home.getAxesTicks();
+
+    assert.notDeepEqual(defaultTicks, switchedTicks);
+});
+
+Scenario("switch time zone back", async (I, home: home) => {
+    const somePattern = "0 * * * * ?";
+    home.evaluateExpressions([somePattern]);
+
+    const defaultTicks = await home.getAxesTicks();
+    home.clickSwitchTimeZone();
+    home.clickSwitchTimeZone();
+    const restoredTicks = await home.getAxesTicks();
+
+    assert.deepEqual(defaultTicks, restoredTicks);
+});

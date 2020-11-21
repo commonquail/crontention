@@ -15,6 +15,8 @@ const dateField = document.getElementById("date") as HTMLInputElement;
 const expressionsField = document.getElementById("expressions") as HTMLInputElement;
 const summary = document.getElementById("summary") as HTMLElement;
 const detail = document.getElementById("detail") as HTMLElement;
+const tzActive = document.getElementById("tz-active") as HTMLSpanElement;
+const switchTz = document.getElementById("switch-tz") as HTMLButtonElement;
 
 const hide = (e: HTMLElement): void => e.classList.add("hidden");
 const show = (e: HTMLElement): void => e.classList.remove("hidden");
@@ -36,14 +38,64 @@ const yScale = d3.scaleBand<number>()
     .domain([... Array(24).keys()].reverse())
     .padding(0.05);
 
+interface TimeAxisTickValue {
+    (d: Date, n: number): void;
+}
+
+interface TimeAxisTickFormat {
+    (dtf: Intl.DateTimeFormat, f: TimeAxisTickValue): (n: number) => string;
+}
+
+interface TimeZoneAwareTimeAxisTickFormat {
+    (tz: string): (n: number) => string;
+}
+
 const scaleFormat = d3.format("02.0d");
+
+const dateFormatTickFormat: TimeAxisTickFormat = (dtf, f) => {
+    return (n: number): string => {
+        const dv = dateField.value || "today";
+        let d;
+        if (dv === "today") {
+            d = new Date();
+        } else {
+            // User input. Value may be nonsense -- if we can't parse it,
+            // default to "now".
+            const tryParseUserDate = Date.parse(`${dv}T00:00:00Z`);
+            d = new Date(tryParseUserDate || Date.now());
+        }
+
+        f(d, n);
+        const res = dtf.format(d)
+        // "2-digit" format doesn't always work. Use "numeric" and re-format as
+        // number with leading zero. Ugh.
+        // https://stackoverflow.com/a/33402359/482758
+        return scaleFormat(parseInt(res));
+    };
+}
+
+const tickFormatX: TimeZoneAwareTimeAxisTickFormat = (tz) => {
+    // Microsoft/TypeScript#37326: Intl missing hourCycle
+    const intlOpts = { timeZone: tz, minute: "numeric", hourCycle: "h23" } as any;
+    const dtf = new Intl.DateTimeFormat("default", intlOpts);
+    const f: TimeAxisTickValue = (d, n) => d.setUTCMinutes(n);
+    return dateFormatTickFormat(dtf, f);
+}
+
+const tickFormatY: TimeZoneAwareTimeAxisTickFormat = (tz) => {
+    // Microsoft/TypeScript#37326: Intl missing hourCycle
+    const intlOpts = { timeZone: tz, hour: "numeric", hourCycle: "h23" } as any;
+    const dtf = new Intl.DateTimeFormat("default", intlOpts);
+    const f: TimeAxisTickValue = (d, n) => d.setUTCHours(n);
+    return dateFormatTickFormat(dtf, f);
+}
 
 const xAxisGenerator = d3.axisTop(xScale);
 xAxisGenerator.tickValues(xScale.domain().filter((_, i) => !(i % 5)));
-xAxisGenerator.tickFormat(scaleFormat);
+xAxisGenerator.tickFormat(tickFormatX("UTC"));
 
 const yAxisGenerator = d3.axisLeft(yScale);
-yAxisGenerator.tickFormat(scaleFormat);
+yAxisGenerator.tickFormat(tickFormatY("UTC"));
 
 const xAxis = svg.append("g")
     .call(xAxisGenerator)
@@ -425,7 +477,27 @@ const repopulateFormWith = (params: HistoryState) => {
     form.expressions.value = params.get("expressions") || null;
     form.date.value = params.get("date") || null;
 
+    setAxesTimeZoneTo("UTC");
+
     isInputValid();
+}
+
+const setAxesTimeZoneTo = (newTimeZone: string) => {
+    const localeTz = new Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+    const alternativeTimeZone = newTimeZone === "UTC" ? localeTz : "UTC";
+
+    // "data-tz" holds the time zone to activate when we click the "switch"
+    // button. The click handler passes in the value of "data-tz" when the
+    // clicked element has one such.
+    switchTz.dataset.tz = alternativeTimeZone;
+    switchTz.textContent = `Switch to ${alternativeTimeZone}`;
+
+    tzActive.textContent = newTimeZone;
+    yAxisGenerator.tickFormat(tickFormatY(newTimeZone));
+    yAxis.call(yAxisGenerator);
+    xAxisGenerator.tickFormat(tickFormatX(newTimeZone));
+    xAxis.call(xAxisGenerator);
 }
 
 const onpopstate = (e: PopStateEvent): void => {
@@ -537,6 +609,8 @@ const docClick = (e: Event) => {
                 cellsForExpression[clicked.dataset.expr].forEach(turnOn);
                 turnOn(clicked);
             }
+        } else if (clicked.dataset.tz) {
+            setAxesTimeZoneTo(clicked.dataset.tz);
         }
     }
 }

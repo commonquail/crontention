@@ -23,6 +23,9 @@ export = {
     editButton: {
         id: "edit"
     },
+    switchTimeZoneButton: {
+        id: "switch-tz"
+    },
     navigateToAbout: () => {
         I.clickLink("What is this?");
     },
@@ -39,8 +42,17 @@ export = {
     clickEdit: function() {
         I.click(this.editButton);
     },
+    clickSwitchTimeZone: function() {
+        I.click(this.switchTimeZoneButton);
+    },
     getCellClasses: async function(): Promise<string[]> {
         return I.grabAttributeFrom(this.cell, "class") as any as string[];
+    },
+    getAxesTicks: async function(): Promise<string[]> {
+        // grabTextFrom doesn't work because it relies on "innerText", which does
+        // not exist on SVG elements. Fortunately this selector yields a
+        // perfect result.
+        return I.grabHTMLFrom(".tick text") as any as string[];
     },
     nthCell: function(n: number): string {
         return `${this.cell}:nth-of-type(${n})`;
