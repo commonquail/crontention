@@ -344,6 +344,7 @@
         };
         const repopulateFormWith = (params) => {
             form.expressions.value = params.get("expressions") || null;
+            form.date.value = params.get("date") || null;
             isInputValid();
         };
         const onpopstate = (e) => {

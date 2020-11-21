@@ -416,6 +416,8 @@ const load = () => {
 type HistoryState = Map<string, string>;
 const repopulateFormWith = (params: HistoryState) => {
     form.expressions.value = params.get("expressions") || null;
+    form.date.value = params.get("date") || null;
+
     isInputValid();
 }
 

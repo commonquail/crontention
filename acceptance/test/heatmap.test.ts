@@ -11,6 +11,11 @@ Scenario("init heat map from query", async (I, home: home) => {
     I.seeElement(home.renderedListing);
     I.seeNumberOfElements(home.cell, 6);
     I.see("1 event at 01:02, 01:03, 01:04, 03:02, …");
+
+    const expressions = await I.grabValueFrom(home.fields.expressions);
+    assert.equal(expressions, "0 2-4 1,3 * * ? *");
+    const date = await I.grabValueFrom(home.fields.date);
+    assert.equal(date, "2020-08-14");
 });
 
 Scenario("draws cell for each active minute of day", (I, home: home) => {
