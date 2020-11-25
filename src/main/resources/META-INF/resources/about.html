@@ -37,7 +37,7 @@ If you think something could be improved, <a href="https://gitlab.com/mkjeldsen/
             <li>Crontention uses a real Quartz scheduler to evaluate fire-times.
 This means expression evaluations are authentic but also that Crontention relies on a server-side component.</li>
             <li><a href="https://crontention.herokuapp.com">https://crontention.herokuapp.com</a> runs on a <a href="https://www.heroku.com/dynos">Heroku <i>Free</i> dyno</a> so it is likely you have to wait for it to wake up every time you visit.</li>
-            <li>All times are in UTC.</li>
+            <li>All times are in UTC by default; but you can optionally shift the heat map axes to your local time zone to better reason about local time.</li>
             <li>Only a single day of events will be calculated&mdash;by default, the current date.</li>
             <li>The heat map's granularity is constrained to minutes and therefore overestimates the footprint of sub-minute duration jobs.</li>
             <li>The heat map does not consider job duration and therefore underestimates the footprint of long-running jobs.</li>

@@ -11,6 +11,7 @@ Scenario("loads default page", (I, home: home) => {
     I.see("Heat map");
     I.see("Most contention");
     I.see("Hover cell for details");
+    I.see("Displaying axes in time zone UTC");
     I.dontSeeElement(home.cell);
     I.dontSeeElement(home.renderedListing);
 });

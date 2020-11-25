@@ -38,6 +38,8 @@
         const expressionsField = document.getElementById("expressions");
         const summary = document.getElementById("summary");
         const detail = document.getElementById("detail");
+        const tzActive = document.getElementById("tz-active");
+        const switchTz = document.getElementById("switch-tz");
         const hide = (e) => e.classList.add("hidden");
         const show = (e) => e.classList.remove("hidden");
         const svg = d3.select("#heatmap")
@@ -55,11 +57,48 @@
             .domain([...Array(24).keys()].reverse())
             .padding(0.05);
         const scaleFormat = d3.format("02.0d");
-        svg.append("g")
-            .call(d3
-            .axisTop(xScale)
-            .tickValues(xScale.domain().filter((_, i) => !(i % 5)))
-            .tickFormat(scaleFormat))
+        const dateFormatTickFormat = (dtf, f) => {
+            return (n) => {
+                const dv = dateField.value || "today";
+                let d;
+                if (dv === "today") {
+                    d = new Date();
+                }
+                else {
+                    // User input. Value may be nonsense -- if we can't parse it,
+                    // default to "now".
+                    const tryParseUserDate = Date.parse(`${dv}T00:00:00Z`);
+                    d = new Date(tryParseUserDate || Date.now());
+                }
+                f(d, n);
+                const res = dtf.format(d);
+                // "2-digit" format doesn't always work. Use "numeric" and re-format as
+                // number with leading zero. Ugh.
+                // https://stackoverflow.com/a/33402359/482758
+                return scaleFormat(parseInt(res));
+            };
+        };
+        const tickFormatX = (tz) => {
+            // Microsoft/TypeScript#37326: Intl missing hourCycle
+            const intlOpts = { timeZone: tz, minute: "numeric", hourCycle: "h23" };
+            const dtf = new Intl.DateTimeFormat("default", intlOpts);
+            const f = (d, n) => d.setUTCMinutes(n);
+            return dateFormatTickFormat(dtf, f);
+        };
+        const tickFormatY = (tz) => {
+            // Microsoft/TypeScript#37326: Intl missing hourCycle
+            const intlOpts = { timeZone: tz, hour: "numeric", hourCycle: "h23" };
+            const dtf = new Intl.DateTimeFormat("default", intlOpts);
+            const f = (d, n) => d.setUTCHours(n);
+            return dateFormatTickFormat(dtf, f);
+        };
+        const xAxisGenerator = d3.axisTop(xScale);
+        xAxisGenerator.tickValues(xScale.domain().filter((_, i) => !(i % 5)));
+        xAxisGenerator.tickFormat(tickFormatX("UTC"));
+        const yAxisGenerator = d3.axisLeft(yScale);
+        yAxisGenerator.tickFormat(tickFormatY("UTC"));
+        const xAxis = svg.append("g")
+            .call(xAxisGenerator)
             .call(g => g
             .append("text")
             .attr("x", 10 + (width / 2))
@@ -67,8 +106,8 @@
             .attr("fill", "currentColor")
             .attr("text-anchor", "middle")
             .text("Minute"));
-        svg.append("g")
-            .call(d3.axisLeft(yScale).tickFormat(scaleFormat))
+        const yAxis = svg.append("g")
+            .call(yAxisGenerator)
             .call(g => g
             .append("text")
             .attr("x", -(height / 2))
@@ -176,6 +215,8 @@
             renderExpressions();
             hide(form);
             show(renderedExpressions);
+            xAxis.call(xAxisGenerator);
+            yAxis.call(yAxisGenerator);
             data.sort(compareCellDatumDesc);
             const scaleFill = scaleFillFactory(data);
             const fillCell = (d) => scaleFill(d.value);
@@ -345,7 +386,22 @@
         const repopulateFormWith = (params) => {
             form.expressions.value = params.get("expressions") || null;
             form.date.value = params.get("date") || null;
+            setAxesTimeZoneTo("UTC");
             isInputValid();
+        };
+        const setAxesTimeZoneTo = (newTimeZone) => {
+            const localeTz = new Intl.DateTimeFormat().resolvedOptions().timeZone;
+            const alternativeTimeZone = newTimeZone === "UTC" ? localeTz : "UTC";
+            // "data-tz" holds the time zone to activate when we click the "switch"
+            // button. The click handler passes in the value of "data-tz" when the
+            // clicked element has one such.
+            switchTz.dataset.tz = alternativeTimeZone;
+            switchTz.textContent = `Switch to ${alternativeTimeZone}`;
+            tzActive.textContent = newTimeZone;
+            yAxisGenerator.tickFormat(tickFormatY(newTimeZone));
+            yAxis.call(yAxisGenerator);
+            xAxisGenerator.tickFormat(tickFormatX(newTimeZone));
+            xAxis.call(xAxisGenerator);
         };
         const onpopstate = (e) => {
             const state = e.state;
@@ -443,6 +499,9 @@
                         cellsForExpression[clicked.dataset.expr].forEach(turnOn);
                         turnOn(clicked);
                     }
+                }
+                else if (clicked.dataset.tz) {
+                    setAxesTimeZoneTo(clicked.dataset.tz);
                 }
             }
         };
