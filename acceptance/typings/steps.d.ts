@@ -4,9 +4,8 @@ type about = typeof import('page/about.page');
 type home = typeof import('page/home.page');
 
 declare namespace CodeceptJS {
-  interface SupportObject { I: CodeceptJS.I, about: about, home: home }
-  interface CallbackOrder { [0]: CodeceptJS.I; [1]: about; [2]: home }
-  interface Methods extends CodeceptJS.Puppeteer {}
+  interface SupportObject { I: I, current: any, about: about, home: home }
+  interface Methods extends Puppeteer {}
   interface I extends ReturnType<steps_file> {}
   namespace Translation {
     interface Actions {}

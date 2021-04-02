@@ -2,11 +2,11 @@ import * as assert from "assert";
 
 Feature("Rendered listing");
 
-Before((I, home: home) => {
+Before(({I, home}) => {
     I.amOnPage(home.url);
 })
 
-Scenario("click evaluate to replace form", async (I, home: home) => {
+Scenario("click evaluate to replace form", async ({I, home}) => {
     I.seeElement(home.form);
 
     const oneCell = "0 0 0 * * ?";
@@ -22,7 +22,7 @@ Scenario("click evaluate to replace form", async (I, home: home) => {
     I.dontSeeElement(home.highlight);
 });
 
-Scenario("click edit to restore form", async (I, home: home) => {
+Scenario("click edit to restore form", async ({I, home}) => {
     const oneCell = "0 0 0 * * ?";
     home.evaluateExpressions([oneCell]);
 
@@ -36,7 +36,7 @@ Scenario("click edit to restore form", async (I, home: home) => {
     I.dontSeeElement(home.editButton);
 });
 
-Scenario("click entry to enable entry and cell highlighting", async (I, home: home) => {
+Scenario("click entry to enable entry and cell highlighting", async ({I, home}) => {
     const oneCell = "0 0 0 * * ?";
     home.evaluateExpressions([oneCell]);
 
@@ -48,7 +48,7 @@ Scenario("click entry to enable entry and cell highlighting", async (I, home: ho
     I.seeElement(`${home.highlight}${home.cell}`);
 });
 
-Scenario("click enabled entry to disable highlighting", async (I, home: home) => {
+Scenario("click enabled entry to disable highlighting", async ({I, home}) => {
     const oneCell = "0 0 0 * * ?";
     home.evaluateExpressions([oneCell]);
 
@@ -60,7 +60,7 @@ Scenario("click enabled entry to disable highlighting", async (I, home: home) =>
     I.dontSeeElement(home.highlight);
 });
 
-Scenario("only enabled entry cells are highlighted", async (I, home: home) => {
+Scenario("only enabled entry cells are highlighted", async ({I, home}) => {
     // Two patterns with different cell counts, so we can identify them.
     const oneCell = "0 0 0 * * ?";
     const twoCells = "0 0 1,2 * * ?";
@@ -79,7 +79,7 @@ Scenario("only enabled entry cells are highlighted", async (I, home: home) => {
     assert.equal(twoNotHighlighted.length, 2);
 });
 
-Scenario("switches active highlight from enabled entry to newly clicked entry", async (I, home: home) => {
+Scenario("switches active highlight from enabled entry to newly clicked entry", async ({I, home}) => {
     home.evaluateExpressions([
         "0 0 0 * * ?",
         "0 0 1 * * ?",
@@ -105,7 +105,7 @@ Scenario("switches active highlight from enabled entry to newly clicked entry", 
     I.seeElement(`${home.highlight}${home.cell}`);
 });
 
-Scenario("click edit after highlight resets highlight", async (I, home: home) => {
+Scenario("click edit after highlight resets highlight", async ({I, home}) => {
     const oneCell = "0 0 0 * * ?";
     home.evaluateExpressions([oneCell]);
 
@@ -118,7 +118,7 @@ Scenario("click edit after highlight resets highlight", async (I, home: home) =>
     I.dontSeeElement(home.highlight);
 });
 
-Scenario("render entries even when no cells", async (I, home: home) => {
+Scenario("render entries even when no cells", async ({I, home}) => {
     const zeroCells = "1 * * ? * * 2000";
     home.evaluateExpressions([zeroCells]);
 

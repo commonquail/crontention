@@ -11,8 +11,8 @@
   "devDependencies": {
     "@types/d3": "5.7.2",
     "@types/node": "13.9.3",
-    "codeceptjs": "2.6.6",
-    "puppeteer": "5.2.1",
+    "codeceptjs": "3.0.5",
+    "puppeteer": "8.0.0",
     "ts-node": "8.10.2",
     "typescript": "3.8.3",
     "typescript-bundle": "1.0.17"

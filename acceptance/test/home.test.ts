@@ -1,10 +1,10 @@
 Feature("Home page");
 
-Before((I, home: home) => {
+Before(({I, home}) => {
     I.amOnPage(home.url);
 })
 
-Scenario("loads default page", (I, home: home) => {
+Scenario("loads default page", ({I, home}) => {
     I.seeInTitle(home.title);
     I.seeInField(home.fields.expressions, "");
     I.seeAttributesOnElements(home.fields.date, { placeholder: "today" });
@@ -16,7 +16,7 @@ Scenario("loads default page", (I, home: home) => {
     I.dontSeeElement(home.renderedListing);
 });
 
-Scenario("links to about page", (I, about: about, home: home) => {
+Scenario("links to about page", ({I, about, home}) => {
     home.navigateToAbout();
     I.seeCurrentUrlEquals(about.url);
 });
