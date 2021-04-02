@@ -2,11 +2,11 @@ import * as assert from "assert";
 
 Feature("Heat map");
 
-Before((I, home: home) => {
+Before(({I, home}) => {
     I.amOnPage(home.url);
 })
 
-Scenario("init heat map from query", async (I, home: home) => {
+Scenario("init heat map from query", async ({I, home}) => {
     I.amOnPage(home.url + "?expressions=0+2-4+1%2C3+*+*+%3F+*&date=2020-08-14")
     I.seeElement(home.renderedListing);
     I.seeNumberOfElements(home.cell, 6);
@@ -18,7 +18,7 @@ Scenario("init heat map from query", async (I, home: home) => {
     assert.equal(date, "2020-08-14");
 });
 
-Scenario("draws cell for each active minute of day", (I, home: home) => {
+Scenario("draws cell for each active minute of day", ({I, home}) => {
     const everyMinute = ["0 * * * * ?"];
     home.evaluateExpressions(everyMinute);
     I.seeNumberOfVisibleElements(home.cell, 60 * 24);
@@ -30,7 +30,7 @@ Scenario("draws cell for each active minute of day", (I, home: home) => {
     I.seeNumberOfVisibleElements(home.cell, 1);
 });
 
-Scenario("reports expression input errors", (I, home: home) => {
+Scenario("reports expression input errors", ({I, home}) => {
     home.evaluateExpressions([
             "0 * * ? * SUN",
             "boo",
@@ -42,7 +42,7 @@ Scenario("reports expression input errors", (I, home: home) => {
     I.dontSee("SUN");
 });
 
-Scenario("reports date input errors", (I, home: home) => {
+Scenario("reports date input errors", ({I, home}) => {
     const somePattern = "0 * * * * ?";
     const invalidDate =  "bah";
     home.evaluateExpressions([somePattern], invalidDate);
@@ -52,7 +52,7 @@ Scenario("reports date input errors", (I, home: home) => {
     I.dontSee(somePattern);
 });
 
-Scenario("draws schedule for specific date", (I, home: home) => {
+Scenario("draws schedule for specific date", ({I, home}) => {
     // Pick 2 patterns that produce different ticks on 2 specific dates, then
     // eval the patterns for those dates and check the number of ticks.
 
@@ -70,7 +70,7 @@ Scenario("draws schedule for specific date", (I, home: home) => {
     I.seeNumberOfVisibleElements(home.cell, 2);
 });
 
-Scenario("updates summary on render", (I, home: home) => {
+Scenario("updates summary on render", ({I, home}) => {
     home.evaluateExpressions([
             "0 * * * * ?",
             "0 1 * * * ?",
@@ -79,7 +79,7 @@ Scenario("updates summary on render", (I, home: home) => {
     I.waitForText("1 event at 00:00, 00:02, 00:03, 00:04, \u{2026}");
 });
 
-Scenario("updates detail section when hovering over cell", (I, home: home) => {
+Scenario("updates detail section when hovering over cell", ({I, home}) => {
     home.evaluateExpressions(["0 * * * * ?"]);
     I.see(home.detailSectionTitle, home.detailSection);
     I.moveCursorTo(home.nthCell(1));
@@ -89,7 +89,7 @@ Scenario("updates detail section when hovering over cell", (I, home: home) => {
     I.see("1 event at ", home.detailSection);
 });
 
-Scenario("freeze unfrozen cell", async (I, home: home) => {
+Scenario("freeze unfrozen cell", async ({I, home}) => {
     // Make sure that we can trigger hover and freeze state...
     const twoCells = "0 0 0,1 * * ?";
     home.evaluateExpressions([twoCells]);
@@ -116,7 +116,7 @@ Scenario("freeze unfrozen cell", async (I, home: home) => {
     assert.equal(detailAfterFreeze, detailAfterFreezeAndHover);
 });
 
-Scenario("unfreeze frozen cell", async (I, home: home) => {
+Scenario("unfreeze frozen cell", async ({I, home}) => {
     // Make sure that we can trigger hover and freeze state.
     const twoCells = "0 0 0,1 * * ?";
     home.evaluateExpressions([twoCells]);
@@ -136,7 +136,7 @@ Scenario("unfreeze frozen cell", async (I, home: home) => {
     assert.notEqual(detailAfterFreeze, detailAfterUnfreezeAndHover);
 });
 
-Scenario("freeze unfrozen cell when other cell frozen", async (I, home: home) => {
+Scenario("freeze unfrozen cell when other cell frozen", async ({I, home}) => {
     const twoCells = "0 0 0,1 * * ?";
     home.evaluateExpressions([twoCells]);
 
@@ -156,7 +156,7 @@ Scenario("freeze unfrozen cell when other cell frozen", async (I, home: home) =>
     assert.notEqual(detailAfterFirstFreeze, detailAfterSecondFreeze);
 });
 
-Scenario("shows time axes in time zone UTC by default", async (I, home: home) => {
+Scenario("shows time axes in time zone UTC by default", async ({I, home}) => {
     const somePattern = "0 * * * * ?";
     home.evaluateExpressions([somePattern]);
 
@@ -172,7 +172,7 @@ Scenario("shows time axes in time zone UTC by default", async (I, home: home) =>
     assert.equal(`${originY}:${originX}`, "00:00");
 });
 
-Scenario("switch time zone to local", async (I, home: home) => {
+Scenario("switch time zone to local", async ({I, home}) => {
     const somePattern = "0 * * * * ?";
     home.evaluateExpressions([somePattern]);
 
@@ -187,7 +187,7 @@ Scenario("switch time zone to local", async (I, home: home) => {
     assert.notDeepEqual(defaultTicks, switchedTicks);
 });
 
-Scenario("switch time zone back", async (I, home: home) => {
+Scenario("switch time zone back", async ({I, home}) => {
     const somePattern = "0 * * * * ?";
     home.evaluateExpressions([somePattern]);
 

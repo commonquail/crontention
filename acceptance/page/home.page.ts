@@ -46,13 +46,13 @@ export = {
         I.click(this.switchTimeZoneButton);
     },
     getCellClasses: async function(): Promise<string[]> {
-        return I.grabAttributeFrom(this.cell, "class") as any as string[];
+        return I.grabAttributeFromAll(this.cell, "class");
     },
     getAxesTicks: async function(): Promise<string[]> {
         // grabTextFrom doesn't work because it relies on "innerText", which does
         // not exist on SVG elements. Fortunately this selector yields a
         // perfect result.
-        return I.grabHTMLFrom(".tick text") as any as string[];
+        return I.grabHTMLFromAll(".tick text");
     },
     nthCell: function(n: number): string {
         return `${this.cell}:nth-of-type(${n})`;
