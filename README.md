@@ -48,7 +48,6 @@ after once running
 
 ```sh
 yarn install
-yarn fix-bundler
 ```
 
 #### Acceptance tests
