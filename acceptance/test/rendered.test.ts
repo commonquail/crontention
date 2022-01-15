@@ -33,7 +33,10 @@ Scenario("click edit to restore form", async ({I, home}) => {
     I.seeElement(home.form);
 
     I.dontSeeElement(home.renderedListing);
-    I.dontSeeElement(home.editButton);
+    // Puppeteer broke recursive visibility in codeceptjs/CodeceptJS#2971.
+    // Asset on the invisible ancestor instead.
+    //I.dontSeeElement(home.editButton);
+    I.dontSeeElement("#rendered-listing");
 });
 
 Scenario("click entry to enable entry and cell highlighting", async ({I, home}) => {
