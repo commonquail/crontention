@@ -9,7 +9,7 @@
     "test:acceptance:def": "TS_NODE_PROJECT=./acceptance/tsconfig.json codeceptjs def && sed 's|./acceptance/||' steps.d.ts > ./acceptance/typings/steps.d.ts && rm steps.d.ts"
   },
   "devDependencies": {
-    "@types/d3": "5.7.2",
+    "@types/d3": "5.16.0",
     "@types/node": "13.9.3",
     "codeceptjs": "3.2.3",
     "faker": "5.5.3",
@@ -19,6 +19,6 @@
     "typescript-bundle": "1.0.17"
   },
   "dependencies": {
-    "d3": "5.15.0"
+    "d3": "5.16.0"
   }
 }
