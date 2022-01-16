@@ -82,7 +82,7 @@ with both Maven and Node.js and I don't want to maintain one.
 
 # License: Apache-2.0
 
-Copyright 2020 Mikkel Kjeldsen
+Copyright 2021 Mikkel Kjeldsen
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
