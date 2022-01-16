@@ -25,10 +25,10 @@ Package Crontention with
 and run it with
 
 ```sh
-java -jar target/crontention-*-runner.jar
+java -jar target/quarkus-app/quarkus-run.jar
 ```
 
-Note that dependencies are in the `target/lib` directory.
+Note that dependencies are in the `target/quarkus-app/lib` directory.
 
 ### Developing
 
