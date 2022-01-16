@@ -16,7 +16,7 @@
     <quarkus.platform.group-id>io.quarkus</quarkus.platform.group-id>
     <quarkus.platform.version>1.7.0.Final</quarkus.platform.version>
     <surefire-plugin.version>3.0.0-M5</surefire-plugin.version>
-    <version.assertj>3.17.0</version.assertj>
+    <version.assertj>3.22.0</version.assertj>
     <version.equalsverifier>3.8.2</version.equalsverifier>
     <version.pitest>1.5.2</version.pitest>
   </properties>
