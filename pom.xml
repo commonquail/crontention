@@ -18,7 +18,7 @@
     <surefire-plugin.version>3.0.0-M5</surefire-plugin.version>
     <version.assertj>3.22.0</version.assertj>
     <version.equalsverifier>3.8.2</version.equalsverifier>
-    <version.pitest>1.5.2</version.pitest>
+    <version.pitest>1.7.3</version.pitest>
   </properties>
   <licenses>
     <license>
